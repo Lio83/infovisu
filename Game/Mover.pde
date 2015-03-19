@@ -7,11 +7,11 @@ final float moverZ = -sphereSize-plate.y/2;
 final int ballColor = 0xFFFF1010;
 
 class Mover {
-  PVector location = new PVector(0,0);
-  PVector velocity = new PVector(0,0);
-  PVector gravity = new PVector(0,0);
+  private PVector location = new PVector(0,0);
+  private PVector velocity = new PVector(0,0);
+  private PVector gravity = new PVector(0,0);
 
-  void update() {
+  private void update() {
     gravity.x = sin(zAngle) * G;
     gravity.y = -sin(xAngle) * G;
     PVector friction = velocity.get();
@@ -22,7 +22,7 @@ class Mover {
     location.add(velocity);
   }
 
-  void checkEdges() {
+  private void checkEdges() {
     if (location.x >= maxX || location.x <= minX) {
       velocity.x *= -rebound;
       location.x = clamp(location.x, minX, maxX);
@@ -33,7 +33,7 @@ class Mover {
     }
   }
   
-  void checkCylinderCollision() {
+  private void checkCylinderCollision() {
     PVector n;
     for(PVector c : cylinders) {
       n = PVector.sub(location, c);

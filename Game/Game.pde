@@ -1,16 +1,16 @@
-// Angles and limits +/-60 deg
+// Angles properties
 final float MIN_ANGLE = -PI/3;
 final float MAX_ANGLE = PI/3;
 float xAngle = 0.0;
 float yAngle = 0.0;
 float zAngle = 0.0;
 
-// Sensitivity and limits
+// Sensitivity properties
 final float MIN_SENSITIVITY = 0.1;
 final float MAX_SENSITIVITY = 1.0;
 float sensitivity = 0.5;
 
-//  Plate dimensions and limits
+// Plate properties
 final PVector plate = new PVector(400, 20, 400);
 final float minX = -plate.x/2;
 final float maxX = plate.x/2;
@@ -22,8 +22,8 @@ final int plateColor = 0xFF10FF10;
 Mover ball = new Mover();
 
 // Cylinders and mode checking boolean
-boolean isShift = false;
 ArrayList<PVector> cylinders = new ArrayList<PVector>();
+boolean isShift = false;
 
 // Auxilliary function for min/max values.
 float clamp(float a, float min_a, float max_a) {
@@ -34,19 +34,18 @@ float clamp(float a, float min_a, float max_a) {
 
 void setup() { 
   size(800, 600, P3D);
-  smooth();
 }
 
 void draw() {
   directionalLight(50, 100, 125, 0, 1, -1);
-  //spotLight(51, 102, 126, 80, 20, 40, 1, 1, -1, PI/2, 1);
   ambientLight(102, 102, 102);
   background(180,250,250);
   noStroke();
+  smooth();
   
   // Text sensitivity
   fill(0);
-  text("Sensitivity:" + sensitivity, 10, height-20);
+  text("Sensitivity: " + sensitivity, 10, height-10);
 
   // Coordinates at the window's center
   translate(width/2, height/2, 0);
@@ -72,17 +71,9 @@ void draw() {
 
     popMatrix();
   } else {
-    
     // Plate 2D rendering
     fill(plateColor);
-    PShape rect = createShape();
-    rect.beginShape(QUADS);
-    rect.vertex(minX, minY, 0);
-    rect.vertex(minX, maxY, 0);
-    rect.vertex(maxX, maxY, 0);
-    rect.vertex(maxX, minY, 0);
-    rect.endShape();
-    shape(rect);
+    rect(minX, minY, plate.x, plate.z);
     
     // Cylinders 2D rendering
     for(PVector c : cylinders)
@@ -91,11 +82,18 @@ void draw() {
     // Ball 2D rendering
     ball.render2D();
     
-    // Cylinder for mouse drag
-    float xpos = clamp(mouseX-width/2, minX, maxX);
-    float ypos = clamp(mouseY-height/2, minY, maxY);   
-    (new Cylinder(xpos, ypos)).render2D();
+    // Cylinder for mouse drag   
+    (new Cylinder(getPosition())).render2D();
   }
+}
+
+/*******************************
+    MOUSE and KEYBOARD EVENTS
+********************************/
+private PVector getPosition() {
+  float xpos = clamp(mouseX - width/2, minX, maxX);
+  float ypos = clamp(mouseY - height/2, minY, maxY);
+  return new PVector(xpos, ypos);
 }
 
 void mouseDragged() {
@@ -114,10 +112,7 @@ void mouseWheel(MouseEvent event) {
 
 void mouseClicked() {
   if(isShift) {
-    float xpos = clamp(mouseX - width/2, minX, maxX);
-    float ypos = clamp(mouseY - height/2, minY, maxY);
-    PVector v = new PVector(xpos, ypos);
-    cylinders.add(v);
+    cylinders.add(getPosition());
   }
 }
 
@@ -130,7 +125,7 @@ void keyReleased() {
 void keyPressed() {
   if (key == CODED) {
     if (keyCode == SHIFT) isShift = true;
-    /*
+    /* old version with Y rotation
     if (keyCode == LEFT)
       yAngle -= 0.1;
     else if (keyCode == RIGHT)
