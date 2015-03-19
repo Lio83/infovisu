@@ -1,13 +1,19 @@
 final float cylinderBaseSize = 20; 
 final float cylinderHeight = 40; 
 final int cylinderResolution = 40;
-  
+final float cylinderZ = -plate.y/2;
+final int cylinderColor = 0xFF1010FF;
   
 class Cylinder {
-  PShape openCylinder, top, bottom, cylinder;
-  float xpos, ypos;
+  private PShape openCylinder, top, bottom, cylinder;
+  private float xpos, ypos;
+  
+  Cylinder(PVector v) {
+   this(v.x, v.y); 
+  }
 
   Cylinder(float xpos, float ypos) {
+    fill(cylinderColor);
     this.xpos = xpos;
     this.ypos = ypos;
     float angle;
@@ -19,7 +25,6 @@ class Cylinder {
       x[i] = sin(angle) * cylinderBaseSize; 
       y[i] = cos(angle) * cylinderBaseSize;
     }
-    fill(170);
     openCylinder = createShape();
     openCylinder.beginShape(QUAD_STRIP);
     //draw the border of the cylinder
@@ -29,21 +34,21 @@ class Cylinder {
     }
     openCylinder.endShape();
   
-    top = createShape();
-    top.beginShape(TRIANGLE_FAN);
-    top.vertex(0,0,0);
-    for(int i = 0; i < x.length; i++) {
-      top.vertex(x[i], y[i], 0);
-    }
-    top.endShape();
-  
     bottom = createShape();
     bottom.beginShape(TRIANGLE_FAN);
-    bottom.vertex(0,0,cylinderHeight);
+    bottom.vertex(0,0,0);
     for(int i = 0; i < x.length; i++) {
-      bottom.vertex(x[i], y[i], cylinderHeight);
+      bottom.vertex(x[i], y[i], 0);
     }
     bottom.endShape();
+  
+    top = createShape();
+    top.beginShape(TRIANGLE_FAN);
+    top.vertex(0,0,cylinderHeight);
+    for(int i = 0; i < x.length; i++) {
+      top.vertex(x[i], y[i], cylinderHeight);
+    }
+    top.endShape();
   
     cylinder = createShape(GROUP);
     cylinder.addChild(openCylinder);
@@ -52,16 +57,15 @@ class Cylinder {
   }
   
   void render2D() {
-    pushMatrix();
-    translate(xpos, ypos, 0);
-    shape(cylinder);
-    popMatrix();
+    fill(cylinderColor);
+    ellipse(xpos, ypos, 2*cylinderBaseSize, 2*cylinderBaseSize);
   }
   
   void render() {
     pushMatrix();
-    translate(xpos, -box.y/2, ypos);
+    translate(xpos, cylinderZ, ypos);
     rotateX(HALF_PI);
+    fill(cylinderColor);
     shape(cylinder);
     popMatrix();
   }
