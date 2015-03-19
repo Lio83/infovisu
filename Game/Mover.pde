@@ -1,48 +1,58 @@
-class Mover { 
-  PVector location;
-  PVector velocity;
-  PVector gravity;
-  PVector friction;
-  
-  final float G = 1.0;
-  final float mu = 0.1;
-  final float rebound = 0.7;
+final float G = 1.0;
+final float mu = 0.1;
+final float rebound = 0.7;
 
-  Mover() {
-    location = new PVector(0,0,-sphereSize-box.y/2); 
-    velocity = new PVector(0,0,0);
-    gravity = new PVector(0,0,0);
-    friction = new PVector(0,0,0);
-  }
+class Mover { 
+  PVector location = new PVector(0,0);
+  PVector velocity = new PVector(0,0);
+  PVector gravity = new PVector(0,0);
 
   void update() {
     gravity.x = sin(zAngle) * G;
-    gravity.y = sin(xAngle) * G;
-    friction = velocity.get();
+    gravity.y = -sin(xAngle) * G;
+    PVector friction = velocity.get();
     friction.normalize();
     friction.mult(-mu);
     gravity.add(friction);
     velocity.add(gravity);
     location.add(velocity);
-  }
-
-  void display() {
-    stroke(0);
-    strokeWeight(2);
-    fill(127);
-    ellipse(location.x, location.y, 48, 48);
+    for(PVector c : cylinders) {
+      PVector n = location.get();
+      n.sub(c);
+      float dist = cylinderBaseSize + sphereSize;
+      if(n.mag() <= dist) {
+        location.set(PVector.add(n,c));
+        n.normalize();
+        float d = -2.0 * velocity.dot(n);
+        velocity.add(PVector.mult(n,d));
+      }
+    }
   }
 
   void checkEdges() {
     if (location.x >= box.x/2 || location.x <= -box.x/2) {
       velocity.x *= -rebound;
-      if (location.x > box.x/2) location.x = box.x/2;
-      if (location.x < -box.x/2) location.x = -box.x/2;
+      location.x = clamp(location.x, -box.x/2, box.x/2);
     }
     if (location.y >= box.z/2 || location.y <= -box.z/2) {
       velocity.y *= -rebound;
-      if (location.y > box.z/2) location.y = box.z/2;
-      if (location.y < -box.z/2) location.y = -box.z/2;
+      location.y = clamp(location.y, -box.z/2, box.z/2);
     }
-  } 
+    
+  }
+  
+  void render2D() {
+    fill(255,20,20);
+    ellipse(mover.location.x, mover.location.y, 2*sphereSize, 2*sphereSize);    
+  }
+  
+  void render() {
+    checkEdges();
+    update();
+    pushMatrix();
+    translate(location.x, -sphereSize-box.y/2, location.y);
+    fill(255,20,20);
+    sphere(sphereSize);
+    popMatrix();
+  }
 }
