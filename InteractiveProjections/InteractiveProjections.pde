@@ -1,6 +1,6 @@
 // Série 3 Infovisu
 void setup() {
-  size(600, 600, P2D);
+  size(800, 600, P2D);
 }
 
 My3DBox input3DBox;
@@ -16,10 +16,10 @@ int X, Y;
 void draw() {
   background(255, 255, 255);
   
-  My3DPoint eye = new My3DPoint(0, 0, -5000);
+  My3DPoint eye = new My3DPoint(-200, -150, -5000);
   
   My3DPoint origin = new My3DPoint(0, 0, 0);
-  input3DBox = new My3DBox(origin, 100, 150, 300);
+  input3DBox = new My3DBox(origin, 100, 150, 200);
   
   //rotated around x
   float[][] transform1 = rotateXMatrix(xAngle); 

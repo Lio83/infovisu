@@ -1,6 +1,6 @@
 // Série 2 Infovisu
 void setup() {
-  size(600, 800, P2D);
+  size(800, 700, P2D);
 }
 
 void draw() {
@@ -15,12 +15,12 @@ void draw() {
   projectBox(eye, input3DBox).render();
   
   //rotated and translated
-  float[][] transform2 = translationMatrix(130, 65, 0); 
+  float[][] transform2 = translationMatrix(200, 80, 0); 
   input3DBox = transformBox(input3DBox, transform2); 
   projectBox(eye, input3DBox).render();
   
   //rotated, translated, and scaled
-  float[][] transform3 = scaleMatrix(2, 2, 2); 
+  float[][] transform3 = scaleMatrix(2.0, 2.0, 2.0); 
   input3DBox = transformBox(input3DBox, transform3); 
   projectBox(eye, input3DBox).render();
 }
