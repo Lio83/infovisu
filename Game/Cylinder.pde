@@ -5,7 +5,7 @@ final float cylBaseSize = 30;
 final float cylinderHeight = 40; 
 final int cylinderResolution = 40;
 final float cylZ = -plate.y/2;
-final int cylinderColor = 0xFF1010FF;
+final int cylinderColor = 0xFF1010AA;
 
 // ======================================================
 //   Cylinder
@@ -67,16 +67,18 @@ class Cylinder {
 // ============================================= Render 2D
   void render2D() {
     fill(cylinderColor);
-    float size = 2*cylBaseSize;
+    noStroke();
+    float size = 2 * cylBaseSize;
     ellipse(pos.x, pos.y, size, size);
   }
 
 // ================================================ Render
   void render() {
+    fill(cylinderColor);
+    noStroke();
     pushMatrix();
     translate(pos.x, cylZ, pos.y);
     rotateX(HALF_PI); //to change orientation
-    fill(cylinderColor);
     shape(cylinder);
     popMatrix();
   }

@@ -1,13 +1,12 @@
-
 // ======================================================
 //   Game
 // ======================================================
-final PVector plate = new PVector(400, 20, 400);
+final PVector plate = new PVector(300, 20, 300);
 final float minX = -plate.x / 2;
 final float maxX = plate.x / 2;
 final float minY = -plate.z / 2;
 final float maxY = plate.z / 2;
-final int plateColor = 0xFF10FF10;
+final int plateColor = 0xFF10AA10;
 boolean editMode = false;
 
 // ==============================================  Angles  
@@ -51,36 +50,40 @@ private PVector getPosition() {
 // ======================================================
 void setup() {
     size(800, 600, P3D);
+    setupScore();
+    scrollbar = new HScrollbar(225, height-25, chartWidth, 15);
 }
 
 // ======================================================
 //   Draw
 // ======================================================
 void draw() {
-    directionalLight(50, 100, 125, 0, 1, -1);
-    ambientLight(102, 102, 102);
     background(180, 250, 250);
-    noStroke();
-    smooth();
 
-    // -------  Text sensitivity in the lower left corner
+    // -------  Text sensitivity in the upper left corner
     fill(0);
     int s = ((int) (sensi * 10)) * 10;
-    text("Sensitivity = " + s + "%", 10, height - 10);
-
+    text("Sensitivity = " + s + "%", 10, 20);
+    
+    // ---------------------------------  Add score board
+    renderScore();
+    scrollbar.update();
+    scrollbar.display();
+    
     // ------------------  Coordinates at window's center
-    pushMatrix();
     translate(width / 2, height / 2, 0);
 
     // =======================================  GAME MODE
     if (!editMode) {
         pushMatrix();
+        lights();
         // -----------------------------  Plate rotations
         rotateX(xAngle);
         rotateY(yAngle);
         rotateZ(zAngle);
         // -----------------------------  Plate rendering
         fill(plateColor);
+        noStroke();
         box(plate.x, plate.y, plate.z);
         // -------------------------  Cylinders rendering
         for (PVector c : cylinders)
@@ -102,7 +105,6 @@ void draw() {
         // ------------------ Mouse cylinder 2D rendering
         (new Cylinder(getPosition())).render2D();
     }
-    popMatrix();
 }
 
 // ======================================================
@@ -111,7 +113,7 @@ void draw() {
 
 // ==========================================  Mouse drag
 void mouseDragged() {
-    if (!editMode) {
+    if (!editMode && !scrollbar.locked) {
         zAngle += sensi * (mouseX-pmouseX) * 0.01;
         xAngle += sensi * (pmouseY-mouseY) * 0.01;
         zAngle = clamp(zAngle, MIN_ANGLE, MAX_ANGLE);

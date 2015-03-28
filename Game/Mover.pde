@@ -7,13 +7,13 @@ final float mu = 0.1;
 final float rebound = 0.7;
 final float collisionDist = cylBaseSize + sphereSize;
 final float moverZ = -sphereSize-plate.y/2;
-final int ballColor = 0xFFFF1010;
+final int ballColor = 0xFFAA1010;
 
 // ======================================================
 //   Mover
 // ======================================================
 class Mover {
-  private PVector location = new PVector();
+  PVector location = new PVector();
   private PVector velocity = new PVector();
   private PVector gravity = new PVector();
 
@@ -39,11 +39,13 @@ class Mover {
     if (location.x >= maxX || location.x <= minX) {
       velocity.x *= -rebound;
       location.x = clamp(location.x, minX, maxX);
+      changeScore(-velocity.mag());
     }
     // ------------------------------------- coordinate Y
     if (location.y >= maxY || location.y <= minY) {
       velocity.y *= -rebound;
       location.y = clamp(location.y, minY, maxY);
+      changeScore(-velocity.mag());
     }
   }
 
@@ -64,12 +66,14 @@ class Mover {
         float d = -2.0 * velocity.dot(n) * rebound;
         n.mult(d);
         velocity.add(n);
+        changeScore(velocity.mag());
       }
     }
   }
 
 // ===========================================  Render 2D
   void render2D() {
+    noStroke();
     fill(ballColor);
     float size = 2 * sphereSize;
     ellipse(location.x, location.y, size, size);
@@ -77,12 +81,13 @@ class Mover {
   
 // ==============================================  Render
   void render() {
+    noStroke();
+    fill(ballColor);
     checkCylinderCollision();
     checkEdges();
     update();
     pushMatrix();
     translate(location.x, moverZ, location.y);
-    fill(ballColor);
     sphere(sphereSize);
     popMatrix();
   }
