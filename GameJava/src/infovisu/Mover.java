@@ -1,105 +1,94 @@
 package infovisu;
 
-import processing.core.*;
-import infovisu.Main;
+import processing.core.PApplet;
+import processing.core.PVector;
 
-public class Mover {
- // ======================================================
-//  Mover constants
-//======================================================
-final static float sphereSize = 20.0f;
-final static float G = 1.0f;
-final static float mu = 0.1f;
-final static float rebound = 0.7f;
-final static float collisionDist = Cylinder.cylBaseSize + sphereSize;
-final static float moverZ = -sphereSize-Main.plate.y/2;
-final static int ballColor = 0xFFAA1010;
+/**
+ * Mover representation with simple physics.
+ * 
+ * @author Lionel, Guillaume, Yannick
+ *
+ */
+class Mover implements GameParameters {
 
-//======================================================
-//  Mover
-//======================================================
- PVector location = new PVector();
- PVector velocity = new PVector();
- private PVector gravity = new PVector();
- private Main p;
- 
- Mover(PApplet parent) {
-     p = (Main)parent;
- }
+    private final static float COLLISION_DIST = CYLINDER_RADIUS + SPHERE_RADIUS;
 
-//======================================  Update physics
- private void update() {
-   // -----------------------------------------  Gravity
-   gravity.x = PApplet.sin(p.zAngle) * G;
-   gravity.y = -PApplet.sin(p.xAngle) * G;
-   // ----------------------------------------  Friction
-   PVector friction = velocity.get();
-   friction.normalize();
-   friction.mult(-mu);
-   // ----------------------------------------  Velocity
-   gravity.add(friction);
-   velocity.add(gravity);
-   // ----------------------------------------  Location
-   location.add(velocity);
- }
+    final PVector location;
+    final PVector velocity;
+    private final PVector gravity;
 
-//===================================  Check for rebound
- private void checkEdges() {
-   // ------------------------------------  coordinate X
-   if (location.x >= Main.maxX || location.x <= Main.minX) {
-     velocity.x *= -rebound;
-     location.x = Main.clamp(location.x, Main.minX, Main.maxX);
-     p.score.changeScore(-velocity.mag());
-   }
-   // ------------------------------------- coordinate Y
-   if (location.y >= Main.maxY || location.y <= Main.minY) {
-     velocity.y *= -rebound;
-     location.y = Main.clamp(location.y, Main.minY, Main.maxY);
-     p.score.changeScore(-velocity.mag());
-   }
- }
+    private final PApplet p;
 
-//=======================  Check for cylinder collisions
- private void checkCylinderCollision() {
-   for(PVector c : p.cylinders) {
-     // ---------------------------------  Normal vector
-     PVector n = PVector.sub(location, c);
-     // ---------------------------  Collision detection
-     if(n.mag() <= collisionDist) {
-       n.setMag(collisionDist);
-       // --------------------  Location out of cylinder
-       PVector v = PVector.add(c, n);
-       location.set(v);
-       checkEdges(); // avoids side effects
-       // ----------------------------  Cylinder rebound
-       n.normalize();
-       float d = -2.0f * velocity.dot(n) * rebound;
-       n.mult(d);
-       velocity.add(n);
-       p.score.changeScore(velocity.mag());
-     }
-   }
- }
+    Mover(PApplet parent) {
+        p = parent;
+        location = new PVector();
+        velocity = new PVector();
+        gravity = new PVector();
+    }
 
-//===========================================  Render 2D
- public void render2D() {
-   p.noStroke();
-   p.fill(ballColor);
-   float size = 2 * sphereSize;
-   p.ellipse(location.x, location.y, size, size);
- }
- 
-//==============================================  Render
- public void render() {
-     p.noStroke();
-     p.fill(ballColor);
-     checkCylinderCollision();
-   checkEdges();
-   update();
-   p.pushMatrix();
-   p.translate(location.x, moverZ, location.y);
-   p.sphere(sphereSize);
-   p.popMatrix();
- }
+    private void update(float xAngle, float zAngle) {
+        // Gravity
+        gravity.x = PApplet.sin(zAngle) * G;
+        gravity.y = -PApplet.sin(xAngle) * G;
+        // Friction
+        PVector friction = velocity.get();
+        friction.normalize();
+        friction.mult(-MU);
+        // Velocity
+        gravity.add(friction);
+        velocity.add(gravity);
+        // Location
+        location.add(velocity);
+    }
+
+    private void checkEdges() {
+        if (location.x >= MAX_X || location.x <= MIN_X) {
+            velocity.x *= -REBOUND;
+            location.x = PApplet.constrain(location.x, MIN_X, MAX_X);
+            // p.score.changeScore(-velocity.mag());
+        }
+        if (location.y >= MAX_Y || location.y <= MIN_Y) {
+            velocity.y *= -REBOUND;
+            location.y = PApplet.constrain(location.y, MIN_Y, MAX_Y);
+            // p.score.changeScore(-velocity.mag());
+        }
+    }
+
+    float checkCylinderCollision(Cylinder c) {
+        // --------------------------------- Normal vector
+        PVector n = PVector.sub(location, c.position);
+        // --------------------------- Collision detection
+        if (n.mag() <= COLLISION_DIST) {
+            n.setMag(COLLISION_DIST);
+            // -------------------- Location out of cylinder
+            PVector v = PVector.add(c.position, n);
+            location.set(v);
+            checkEdges(); // avoids side effects
+            // ---------------------------- Cylinder rebound
+            n.normalize();
+            float d = -2.0f * velocity.dot(n) * REBOUND;
+            n.mult(d);
+            velocity.add(n);
+            return velocity.mag();
+        }
+        return 0f;
+    }
+
+    public void render2D() {
+        p.noStroke();
+        p.fill(BALL_COLOR);
+        float size = 2 * SPHERE_RADIUS;
+        p.ellipse(location.x, location.y, size, size);
+    }
+
+    public void render(float xAngle, float zAngle) {
+        p.noStroke();
+        p.fill(BALL_COLOR);
+        checkEdges();
+        update(xAngle, zAngle);
+        p.pushMatrix();
+        p.translate(location.x, MOVER_Z, location.y);
+        p.sphere(SPHERE_RADIUS);
+        p.popMatrix();
+    }
 }
-

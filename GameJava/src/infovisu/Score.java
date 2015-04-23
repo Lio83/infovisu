@@ -2,83 +2,85 @@ package infovisu;
 
 import java.util.ArrayList;
 
-import processing.core.*;
+import processing.core.PApplet;
+import processing.core.PConstants;
+import processing.core.PGraphics;
 
-public class Score {
-    // ======================================================
-    // Score variables
-    // ======================================================
-    final int scoreBackgndColor = 0xFFEEEEAA;
-    final int scoreHeight = 120;
-    final int topViewHeight = scoreHeight - 10;
-    final int shift = (scoreHeight - topViewHeight) / 2;
-    final int scoreSize = 100;
-    static int chartWidth = 0;
-    final float scaling = topViewHeight / Main.plate.z;
-    PGraphics background, topView, scoreboard, barChart;
-    float score = 0.0f, lastScore = 0.0f;
-    int squareWidth = 0, squareHeight = 3;
-    int prevSec = 0;
-    ArrayList<Integer> scores = new ArrayList<Integer>();
-    Main p;
+/**
+ * Scoreboard for the Game project.
+ *
+ * @author Lionel, Guillaume, Yannick
+ *
+ */
+public class Score implements GameParameters {
+
+    private final static int SPACING = 5;
+    private final static int TOP_VIEW_SIZE = SCORE_HEIGHT - (2 * SPACING);
+    private final static int SCORE_WIDTH = 100;
+    final static int CHART_WIDTH = WINDOW_WIDTH - SCORE_WIDTH - TOP_VIEW_SIZE - 4 * SPACING;
+    private final static float scaling = ((float) TOP_VIEW_SIZE) / PLATE_Z;
+
+    private final PGraphics background, topView, scoreboard, chart;
+
+    private float score = 0f;
+    private float lastScore = 0f;
+    private int squareWidth = 0, squareHeight = 3;
+    private int prevSec = 0;
+    private final ArrayList<Integer> scores = new ArrayList<Integer>();
+    private final PApplet p;
 
     Score(PApplet parent) {
-        p = (Main) parent;
+        p = parent;
+        background = p.createGraphics(WINDOW_WIDTH, SCORE_HEIGHT, PConstants.P2D);
+        topView = p.createGraphics(TOP_VIEW_SIZE, TOP_VIEW_SIZE, PConstants.P2D);
+        scoreboard = p.createGraphics(SCORE_WIDTH, TOP_VIEW_SIZE, PConstants.P2D);
+        chart = p.createGraphics(CHART_WIDTH, SCORE_WIDTH - 20, PConstants.P2D);
     }
 
     // ======================================= Change score
-    void changeScore(float ds) {
+    void changeScore(float ds, float sliderPosition) {
         if (ds > 1 || ds < -1) {
             score += ds;
-            score = Math.max(0, score);
+            score = PApplet.max(0, score);
             lastScore = ds;
         }
-    }
-
-    // ============================================== Setup
-    void setupScore() {
-        background = p.createGraphics(p.width, scoreHeight, PConstants.P2D);
-        topView = p.createGraphics(topViewHeight, topViewHeight, PConstants.P2D);
-        scoreboard = p.createGraphics(scoreSize, topViewHeight, PConstants.P2D);
-        chartWidth = p.width - scoreSize - topViewHeight - 4 * shift;
-        barChart = p.createGraphics(chartWidth, scoreSize - 20, PConstants.P2D);
+        squareWidth = (int) ((sliderPosition + 0.1) * 30);
     }
 
     // ===================================== Draw Bar Chart
-    void drawBarChart() {
-        squareWidth = (int) ((p.scrollbar.getPos() + 0.1) * 30);
+    private void drawBarChart() {
 
         if (PApplet.second() != prevSec) {
             prevSec = PApplet.second();
             scores.add((int) score);
         }
 
-        barChart.beginDraw();
-        barChart.background(scoreBackgndColor - 0x00202020);
-        barChart.pushMatrix();
-        barChart.translate(0, scoreSize - 20);
-        barChart.noStroke();
-        barChart.fill(Cylinder.cylinderColor);
+        chart.beginDraw();
+        chart.background(SCORE_BACKGND_COLOR - 0x00202020);
+        chart.pushMatrix();
+        chart.translate(0, SCORE_WIDTH - 20);
+        chart.noStroke();
+        chart.fill(CYLINDER_COLOR);
 
         for (int i = 0; i < scores.size(); ++i) {
             int s = scores.get(i), j = 0;
             while (s > 0) {
-                barChart.rect(i * squareWidth, --j * squareHeight, squareWidth - 1, squareHeight - 1);
+                chart.rect(i * squareWidth, --j * squareHeight, squareWidth - 1, squareHeight - 1);
                 s -= 10;
             }
         }
-        barChart.popMatrix();
-        barChart.endDraw();
+        chart.popMatrix();
+        chart.endDraw();
 
     }
 
     // ===================================== Draw score board
-    void drawScoreBoard() {
+    private void drawScoreBoard(float velocityMag) {
         scoreboard.beginDraw();
-        scoreboard.background(scoreBackgndColor - 0x00202020);
+        scoreboard.background(SCORE_BACKGND_COLOR - 0x00202020);
         scoreboard.stroke(0);
         scoreboard.fill(0);
-        String velocity = String.format("%.2f", p.ball.velocity.mag());
+        String velocity = String.format("%.2f", velocityMag);
         String rscore = String.format("%.2f", score);
         String lscore = String.format("%.2f", lastScore);
         scoreboard.text("Total score:\n  " + rscore, 10, 15);
@@ -88,49 +90,51 @@ public class Score {
     }
 
     // ====================================== Draw background
-    void drawBackground() {
+    private void drawBackground() {
         background.beginDraw();
-        background.background(scoreBackgndColor);
+        background.background(SCORE_BACKGND_COLOR);
         background.endDraw();
     }
 
     // ======================================== Draw top view
-    void drawTopView() {
+    private void drawTopView(Mover mover, ArrayList<Cylinder> cylinders) {
         topView.beginDraw();
-        topView.background(Main.plateColor);
+        topView.background(PLATE_COLOR);
         topView.noStroke();
-        topView.smooth();
-        topView.fill(Mover.ballColor);
-        float size = 2 * Mover.sphereSize * scaling;
-        topView.ellipse(p.ball.location.x * scaling + topViewHeight / 2, p.ball.location.y * scaling + topViewHeight
-                / 2, size, size);
-        float cylSize = 2 * Cylinder.cylBaseSize * scaling;
-        topView.fill(Cylinder.cylinderColor);
-        for (PVector c : p.cylinders) {
-            topView.ellipse(c.x * scaling + topViewHeight / 2, c.y * scaling + topViewHeight / 2, cylSize, cylSize);
+        topView.fill(BALL_COLOR);
+        float size = 2 * SPHERE_RADIUS * scaling;
+        float x = mover.location.x * scaling + TOP_VIEW_SIZE / 2;
+        float y = mover.location.y * scaling + TOP_VIEW_SIZE / 2;
+        topView.ellipse(x, y, size, size);
+        float cylSize = 2 * Cylinder.CYLINDER_RADIUS * scaling;
+        topView.fill(CYLINDER_COLOR);
+        for (Cylinder c : cylinders) {
+            x = c.position.x * scaling + TOP_VIEW_SIZE / 2;
+            y = c.position.y * scaling + TOP_VIEW_SIZE / 2;
+            topView.ellipse(x, y, cylSize, cylSize);
         }
         topView.endDraw();
     }
 
     // ====================================== Render score
-    void renderScore() {
+    void renderScore(Mover mover, ArrayList<Cylinder> cylinders) {
         p.pushMatrix();
         // -------------------------------------- Background
-        p.translate(0, p.height - scoreHeight);
+        p.translate(0, WINDOW_HEIGHT - SCORE_HEIGHT);
         drawBackground();
         p.image(background, 0, 0);
         // ---------------------------------------- Top view
-        p.translate(shift, shift);
-        drawTopView();
+        p.translate(SPACING, SPACING);
+        drawTopView(mover, cylinders);
         p.image(topView, 0, 0);
         // ------------------------------------- Score board
-        p.translate(topViewHeight + shift, 0);
-        drawScoreBoard();
+        p.translate(TOP_VIEW_SIZE + SPACING, 0);
+        drawScoreBoard(mover.velocity.mag());
         p.image(scoreboard, 0, 0);
         // --------------------------------------- Bar chart
-        p.translate(scoreSize + shift, 0);
+        p.translate(SCORE_WIDTH + SPACING, 0);
         drawBarChart();
-        p.image(barChart, 0, 0);
+        p.image(chart, 0, 0);
         p.popMatrix();
     }
 

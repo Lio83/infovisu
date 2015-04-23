@@ -1,6 +1,6 @@
 package infovisu;
 
-import processing.core.*;
+import processing.core.PApplet;
 
 class HScrollbar {
     float barWidth; // Bar's width in pixels
@@ -18,7 +18,7 @@ class HScrollbar {
 
     /**
      * @brief Creates a new horizontal scrollbar
-     * 
+     *
      * @param x
      *            The x position of the top left corner of the bar in pixels
      * @param y
@@ -46,39 +46,29 @@ class HScrollbar {
      * @brief Updates the state of the scrollbar according to the mouse movement
      */
     void update() {
-        if (isMouseOver()) {
-            mouseOver = true;
-        } else {
-            mouseOver = false;
-        }
-        if (p.mousePressed && mouseOver) {
-            locked = true;
-        }
-        if (!p.mousePressed) {
-            locked = false;
-        }
-        if (locked) {
-            newSliderPosition = constrain(p.mouseX - barHeight / 2, sliderPositionMin, sliderPositionMax);
-        }
-        if (Math.abs(newSliderPosition - sliderPosition) > 1) {
+        if (isMouseOver()) mouseOver = true;
+        else mouseOver = false;
+        if (p.mousePressed && mouseOver) locked = true;
+        if (!p.mousePressed) locked = false;
+        if (locked) newSliderPosition = constrain(p.mouseX - barHeight / 2, sliderPositionMin, sliderPositionMax);
+        if (PApplet.abs(newSliderPosition - sliderPosition) > 1)
             sliderPosition = sliderPosition + (newSliderPosition - sliderPosition);
-        }
     }
 
     /**
      * @brief Clamps the value into the interval
-     * 
+     *
      * @param val
      *            The value to be clamped
      * @param minVal
      *            Smallest value possible
      * @param maxVal
      *            Largest value possible
-     * 
+     *
      * @return val clamped into the interval [minVal, maxVal]
      */
     float constrain(float val, float minVal, float maxVal) {
-        return Math.min(Math.max(val, minVal), maxVal);
+        return PApplet.min(PApplet.max(val, minVal), maxVal);
     }
 
     /**
@@ -88,11 +78,8 @@ class HScrollbar {
      */
     boolean isMouseOver() {
         if (p.mouseX > xPosition && p.mouseX < xPosition + barWidth && p.mouseY > yPosition
-                && p.mouseY < yPosition + barHeight) {
-            return true;
-        } else {
-            return false;
-        }
+                && p.mouseY < yPosition + barHeight) return true;
+        else return false;
     }
 
     /**
@@ -102,17 +89,14 @@ class HScrollbar {
         p.noStroke();
         p.fill(204);
         p.rect(xPosition, yPosition, barWidth, barHeight);
-        if (mouseOver || locked) {
-            p.fill(0, 0, 0);
-        } else {
-            p.fill(102, 102, 102);
-        }
+        if (mouseOver || locked) p.fill(0, 0, 0);
+        else p.fill(102, 102, 102);
         p.rect(sliderPosition, yPosition, barHeight, barHeight);
     }
 
     /**
      * @brief Gets the slider position
-     * 
+     *
      * @return The slider position in the interval [0,1] corresponding to
      *         [leftmost position, rightmost position]
      */
