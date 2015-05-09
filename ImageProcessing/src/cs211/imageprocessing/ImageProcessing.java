@@ -1,13 +1,13 @@
 package cs211.imageprocessing;
 
+import cs211.imageprocessing.transformers.BinaryThreshold;
+import cs211.imageprocessing.transformers.GaussianBlur;
+import cs211.imageprocessing.transformers.HSBThreshold;
+import cs211.imageprocessing.transformers.Hough;
+import cs211.imageprocessing.transformers.ImageTransformer;
+import cs211.imageprocessing.transformers.Sobel;
 import processing.core.PApplet;
 import processing.core.PImage;
-import transformers.BinaryThreshold;
-import transformers.GaussianBlur;
-import transformers.HSBThreshold;
-import transformers.Hough;
-import transformers.ImageTransformer;
-import transformers.Sobel;
 
 @SuppressWarnings("serial")
 public class ImageProcessing extends PApplet {

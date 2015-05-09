@@ -1,4 +1,4 @@
-package transformers;
+package cs211.imageprocessing.transformers;
 
 import processing.core.PApplet;
 import processing.core.PConstants;

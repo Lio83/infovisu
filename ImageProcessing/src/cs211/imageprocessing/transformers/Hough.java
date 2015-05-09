@@ -1,4 +1,4 @@
-package transformers;
+package cs211.imageprocessing.transformers;
 
 import java.util.ArrayList;
 import java.util.Collections;
