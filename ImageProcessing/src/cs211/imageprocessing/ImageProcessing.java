@@ -1,11 +1,6 @@
 package cs211.imageprocessing;
 
-import cs211.imageprocessing.transformers.BinaryThreshold;
-import cs211.imageprocessing.transformers.GaussianBlur;
-import cs211.imageprocessing.transformers.HSBThreshold;
-import cs211.imageprocessing.transformers.Hough;
-import cs211.imageprocessing.transformers.ImageTransformer;
-import cs211.imageprocessing.transformers.Sobel;
+import cs211.imageprocessing.transformers.*;
 import processing.core.PApplet;
 import processing.core.PImage;
 
@@ -39,7 +34,7 @@ public class ImageProcessing extends PApplet {
         PImage h, b, t, s;
 
         h = hsb.apply(src);
-        b = blur.apply(h);
+        b = blur.apply(h, 10);
         t = binary.apply(b);
         s = sobel.apply(t);
 
@@ -56,7 +51,7 @@ public class ImageProcessing extends PApplet {
         image(t, 800, 300);
         image(s, 1200, 300);
 
-        // ArrayList<PVector> lines = hough(sobel, 4);
+        // ArrayList<PVector> intersections = hough.intersections;
         // getIntersection(lines);
         // QG.build(lines, width, img.height);
     }

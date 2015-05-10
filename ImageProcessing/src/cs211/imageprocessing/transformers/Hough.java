@@ -12,13 +12,13 @@ import processing.core.PVector;
 public final class Hough implements ImageTransformer {
     private final PApplet p;
 
-    private int rDim = 0;
     private float discretizationStepsPhi = 0.06f;
     private float discretizationStepsR = 2.5f;
+    private int rDim = 0;
     private int nLines = 10;
     private int minVotes = 200;
-   
-    ArrayList<PVector> intersections = new ArrayList<PVector>();
+
+    public ArrayList<PVector> intersections = new ArrayList<PVector>();
 
     private final int phiDim = (int) (PConstants.PI / discretizationStepsPhi);
     private final float[] tabSin = new float[phiDim];
@@ -44,16 +44,14 @@ public final class Hough implements ImageTransformer {
             minVotes = (int) params[1];
         }
 
-        int width = src.width;
-        int height = src.height;
+        int width = src.width, height = src.height;
         rDim = (int) (((width + height) * 2 + 1) / discretizationStepsR);
 
         final int[] accumulator = new int[(phiDim + 2) * (rDim + 2)];
 
-        for (int y = 0; y < height; ++y)
-            for (int x = 0; x < width; ++x)
-                // Are we on an edge?
-                if (p.brightness(src.get(x, y)) != 0) {
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                if (p.brightness(src.get(x, y)) != 0) { // Are we on an edge?
                     float phi = 0f;
                     for (int i = 0; i < phiDim; ++i, phi += discretizationStepsPhi) {
 
@@ -67,6 +65,8 @@ public final class Hough implements ImageTransformer {
                         accumulator[idx] += 1;
                     }
                 }
+            }
+        }
 
         PImage houghImg = p.createImage(rDim + 2, phiDim + 2, PConstants.ALPHA);
 
@@ -74,7 +74,7 @@ public final class Hough implements ImageTransformer {
             houghImg.pixels[i] = p.color(PApplet.min(255, accumulator[i]));
         houghImg.updatePixels();
 
-        computeIntersections(plot(src, vote(accumulator, nLines), minVotes));
+        getIntersections(getLines(src, vote(accumulator, nLines), minVotes));
 
         houghImg.resize(width, height);
         return houghImg;
@@ -86,31 +86,32 @@ public final class Hough implements ImageTransformer {
 
         ArrayList<Integer> candidates = new ArrayList<Integer>();
 
-        for (int accR = 0; accR < rDim; accR++)
-            for (int accPhi = 0; accPhi < phiDim; accPhi++) {
+        for (int accR = 0; accR < rDim; ++accR) {
+            for (int accPhi = 0; accPhi < phiDim; ++accPhi) {
                 // compute current index in the accumulator
                 int idx = (accPhi + 1) * (rDim + 2) + accR + 1;
                 if (accumulator[idx] > minVotes) {
-                    boolean best = true;
+                    boolean bestCandidate = true;
                     // iterate over the neighbourhood
-                    for (int dPhi = -neighbourhood / 2; dPhi < neighbourhood / 2 + 1; dPhi++) {
+                    for (int dPhi = -neighbourhood / 2; dPhi < neighbourhood / 2 + 1; ++dPhi) {
                         if (accPhi + dPhi < 0 || accPhi + dPhi >= phiDim) continue;
-                        for (int dR = -neighbourhood / 2; dR < neighbourhood / 2 + 1; dR++) {
+                        for (int dR = -neighbourhood / 2; dR < neighbourhood / 2 + 1; ++dR) {
                             if (accR + dR < 0 || accR + dR >= rDim) continue;
 
                             int neighbourIdx = (accPhi + dPhi + 1) * (rDim + 2) + accR + dR + 1;
 
                             if (accumulator[idx] < accumulator[neighbourIdx]) {
                                 // the current idx is not a local maximum!
-                                best = false;
+                                bestCandidate = false;
                                 break;
                             }
                         }
-                        if (!best) break;
+                        if (!bestCandidate) break;
                     }
-                    if (best) candidates.add(idx);
+                    if (bestCandidate) candidates.add(idx);
                 }
             }
+        }
 
         Collections.sort(candidates, new Comparator<Integer>() {
             @Override
@@ -123,20 +124,19 @@ public final class Hough implements ImageTransformer {
 
         int[] accumulatorNew = new int[(phiDim + 2) * (rDim + 2)];
 
-        for (int i = 0; i < nLines; i++) {
+        for (int i = 0; i < nLines; ++i) {
             if (i < candidates.size()) {
                 int idx = candidates.get(i);
                 accumulatorNew[idx] = accumulator[idx];
             }
         }
-
         return accumulatorNew;
     }
 
-    private ArrayList<PVector> plot(PImage src, int[] accumulatorNew, int minVotes) {
-        ArrayList<PVector> result = new ArrayList<PVector>();
+    private ArrayList<PVector> getLines(PImage src, int[] accumulatorNew, int minVotes) {
+        ArrayList<PVector> lines = new ArrayList<PVector>();
 
-        for (int idx = 0; idx < accumulatorNew.length; idx++)
+        for (int idx = 0; idx < accumulatorNew.length; ++idx) {
             if (accumulatorNew[idx] > minVotes) {
                 // first, compute back the (r, phi) polar coordinates:
                 int accPhi = idx / (rDim + 2) - 1;
@@ -144,7 +144,7 @@ public final class Hough implements ImageTransformer {
                 float r = (accR - (rDim - 1) * 0.5f) * discretizationStepsR;
                 float phi = accPhi * discretizationStepsPhi;
 
-                result.add(new PVector(r, phi));
+                lines.add(new PVector(r, phi));
 
                 int x0 = 0;
                 int y0 = (int) (r / PApplet.sin(phi));
@@ -166,10 +166,11 @@ public final class Hough implements ImageTransformer {
                     else p.line(x1, y1, x3, y3);
                 } else p.line(x2, y2, x3, y3);
             }
-        return result;
+        }
+        return lines;
     }
 
-    public void computeIntersections(ArrayList<PVector> lines) {
+    private void getIntersections(ArrayList<PVector> lines) {
         for (int i = 0; i < lines.size() - 1; ++i) {
             PVector line1 = lines.get(i);
             float r1 = line1.x;
@@ -186,8 +187,8 @@ public final class Hough implements ImageTransformer {
                 float y = (-1 * r2 * PApplet.cos(phi1) + r1 * PApplet.cos(phi2)) / d;
 
                 PVector pv = new PVector(x, y);
-                if (x >= 0 && x <= p.width && y >= 0 && y <= p.height) 
-                    intersections.add(pv);
+                if (x >= 0 && x <= p.width && y >= 0 && y <= p.height) intersections.add(pv);
+
                 // draw the intersection
                 p.fill(255, 128, 0);
                 p.ellipse(x, y, 10, 10);
@@ -195,6 +196,10 @@ public final class Hough implements ImageTransformer {
         }
     }
 
+    /**
+     * Default value for number of lines 10 <br>
+     * and for number of votes 200
+     */
     @Override
     public PImage apply(PImage src) {
         return apply(src, nLines, minVotes);

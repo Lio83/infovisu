@@ -6,10 +6,10 @@ import processing.core.PImage;
 
 public final class Sobel implements ImageTransformer {
     private final PApplet p;
-    private final static int[][] hKernel = { { 0, 1, 0 }, { 0, 0, 0 }, { 0, -1, 0 } };
-
-    private final static int[][] vKernel = { { 0, 0, 0 }, { 1, 0, -1 }, { 0, 0, 0 } };
     
+    private final static int[][] hKernel = { { 0, 1, 0 }, { 0, 0, 0 }, { 0, -1, 0 } };
+    private final static int[][] vKernel = { { 0, 0, 0 }, { 1, 0, -1 }, { 0, 0, 0 } };
+
     private float threshold = .3f;
 
     public Sobel(PApplet parent) {
@@ -17,22 +17,21 @@ public final class Sobel implements ImageTransformer {
     }
 
     /**
-     * @param params threshold value (default: 0.3).
+     * @param params
+     *            threshold value.
      */
     @Override
     public PImage apply(PImage src, float... params) {
-        if (params != null && params.length > 0) threshold = params[0];
-        int width = src.width;
-        int height = src.height;
+        if (params != null && params.length == 1) threshold = params[0];
+        int width = src.width, height = src.height;
 
         PImage result = p.createImage(width, height, PConstants.RGB);
 
-        float max = 0;
         float[] buffer = new float[width * height];
-        float sum_h = 0, sum_v = 0, sum = 0;
+        float sum_h = 0, sum_v = 0, sum = 0, max = 0;
 
-        for (int y = 1; y < height - 1; y++) {
-            for (int x = 1; x < width - 1; x++) {
+        for (int y = 1; y < height - 1; ++y) {
+            for (int x = 1; x < width - 1; ++x) {
                 sum_h = sobel(src, x, y, hKernel);
                 sum_v = sobel(src, x, y, vKernel);
                 sum = (int) PApplet.sqrt(sum_h * sum_h + sum_v * sum_v);
@@ -45,12 +44,10 @@ public final class Sobel implements ImageTransformer {
 
         for (int y = 1; y < height - 1; ++y) {
             for (int x = 1; x < width - 1; ++x) {
-                int c = buffer[y * width + x] > max * threshold 
-                        ? p.color(255) : p.color(0);
+                int c = (buffer[y * width + x] > max * threshold) ? p.color(255) : p.color(0);
                 result.set(x, y, c);
             }
         }
-
         return result;
     }
 
@@ -65,6 +62,9 @@ public final class Sobel implements ImageTransformer {
         return acc;
     }
 
+    /**
+     * Default value for threshold 0.3f
+     */
     @Override
     public PImage apply(PImage src) {
         return apply(src, threshold);

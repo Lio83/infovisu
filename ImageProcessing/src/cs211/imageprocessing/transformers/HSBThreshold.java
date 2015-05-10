@@ -20,7 +20,7 @@ public final class HSBThreshold implements ImageTransformer {
      */
     @Override
     public PImage apply(PImage src, float... params) {
-        if (params.length == 6) {
+        if (params != null && params.length == 6) {
             hueMin = params[0];
             hueMax = params[1];
             satMin = params[2];
@@ -33,21 +33,24 @@ public final class HSBThreshold implements ImageTransformer {
 
         for (int y = 0; y < src.height; ++y) {
             for (int x = 0; x < src.width; ++x) {
+                int pix = src.get(x, y);
+                float hue = p.hue(pix);
+                float bri = p.brightness(pix);
+                float sat = p.saturation(pix);
 
-                float hue = p.hue(src.get(x, y));
-                float bri = p.brightness(src.get(x, y));
-                float sat = p.saturation(src.get(x, y));
-
-                int c = hue > hueMin && hue < hueMax && sat > satMin && sat < satMax && bri > briMin && bri < briMax ? src
-                        .get(x, y) : p.color(0);
+                int c = (hue > hueMin && hue < hueMax &&
+                         sat > satMin && sat < satMax &&
+                         bri > briMin && bri < briMax) ? pix : p.color(0);
 
                 result.set(x, y, c);
             }
         }
-
         return result;
     }
 
+    /**
+     * Default value for HSB : 80, 140, 80, 255, 30, 200
+     */
     @Override
     public PImage apply(PImage src) {
         return apply(src, hueMin, hueMax, satMin, satMax, briMin, briMax);

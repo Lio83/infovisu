@@ -9,20 +9,20 @@ public final class GaussianBlur implements ImageTransformer {
 
     private final static float[][] kernel = { { 9, 12, 9 }, { 12, 15, 12 }, { 9, 12, 9 } };
 
-    private float weight = 1f;
+    private float weight = 1;
 
     public GaussianBlur(PApplet parent) {
         p = parent;
     }
 
     /**
-     * @param params weight of the applied blur > 0. (default: 1)
+     * @param params
+     *            weight of the applied blur > 0. (default: 1)
      */
     @Override
     public PImage apply(PImage src, float... params) {
-        if (params != null && params.length > 0) weight = params[0];
-        int width = src.width;
-        int height = src.height;
+        if (params != null && params.length == 1) weight = params[0];
+        int width = src.width, height = src.height;
 
         PImage result = p.createImage(width, height, PConstants.RGB);
 
@@ -34,28 +34,29 @@ public final class GaussianBlur implements ImageTransformer {
     }
 
     private int blur(PImage src, int x, int y) {
-        
-        float[] rgba = new float[4];
+        float[] rgb = new float[3];
 
         for (int j = -1; j < 2; ++j) {
             for (int i = -1; i < 2; ++i) {
                 int c = src.get(x + i, y + j);
-                rgba[0] += p.red(c) * kernel[i + 1][j + 1];
-                rgba[1] += p.green(c) * kernel[i + 1][j + 1];
-                rgba[2] += p.blue(c) * kernel[i + 1][j + 1];
-                rgba[3] += p.alpha(c) * kernel[i + 1][j + 1];
+                float k = kernel[i + 1][j + 1];
+                rgb[0] += p.red(c) * k;
+                rgb[1] += p.green(c) * k;
+                rgb[2] += p.blue(c) * k;
             }
         }
-        for (int i = 0; i < 4; ++i)
-            rgba[i] = PApplet.constrain(rgba[i] / weight, 0, 255);
         
-        return p.color(rgba[0],rgba[1],rgba[2],rgba[3]);
-   
+        for (int i = 0; i < 3; ++i)
+            rgb[i] = PApplet.constrain(rgb[i] / weight, 0, 255);
+
+        return p.color(rgb[0], rgb[1], rgb[2]);
     }
 
+    /**
+     * Default value for weight 1
+     */
     @Override
     public PImage apply(PImage src) {
         return apply(src, weight);
     }
-
 }

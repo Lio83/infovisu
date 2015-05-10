@@ -5,7 +5,7 @@ import processing.core.PImage;
 public interface ImageTransformer {
 
     /**
-     * Transforms the image with the given parameters applied.
+     * Transforms the image with the given parameters.
      *
      * @param src
      *            source image.
@@ -16,7 +16,7 @@ public interface ImageTransformer {
     public PImage apply(PImage src, float... params);
 
     /**
-     * Transforms the image with the defaults parameters applied.
+     * Transforms the image with the defaults parameters.
      *
      * @param src
      *            source image.

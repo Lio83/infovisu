@@ -1,6 +1,7 @@
 package cs211.imageprocessing;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import processing.core.PApplet;
 import processing.core.PVector;
@@ -39,6 +40,30 @@ public class QuadGraph {
 
                     idx++;
                 }
+        for (int[] quad : findCycles()) {
+            PVector l1 = lines.get(quad[0]);
+            PVector l2 = lines.get(quad[1]);
+            PVector l3 = lines.get(quad[2]);
+            PVector l4 = lines.get(quad[3]);
+
+            // (intersection() is a simplified version of the
+            // intersections() method you wrote last week, that simply
+            // return the coordinates of the intersection between 2 lines)
+            PVector c12 = intersection(l1, l2);
+            PVector c23 = intersection(l2, l3);
+            PVector c34 = intersection(l3, l4);
+            PVector c41 = intersection(l4, l1);
+
+            if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41)) {
+                // Choose a random, semi-transparent colour
+                Random random = new Random();
+
+                p.fill(p.color(PApplet.min(255, random.nextInt(300)), PApplet.min(255, random.nextInt(300)),
+                        PApplet.min(255, random.nextInt(300))), 50);
+
+                p.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+            }
+        }
 
     }
 
