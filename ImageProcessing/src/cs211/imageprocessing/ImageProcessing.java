@@ -1,8 +1,11 @@
 package cs211.imageprocessing;
 
+import java.util.ArrayList;
+
 import cs211.imageprocessing.transformers.*;
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 
 @SuppressWarnings("serial")
 public class ImageProcessing extends PApplet {
@@ -22,7 +25,7 @@ public class ImageProcessing extends PApplet {
         sobel = new Sobel(this);
         hough = new Hough(this);
 
-        // QG = new QuadGraph(this);
+        QG = new QuadGraph(this);
 
         noLoop(); // no refresh
     }
@@ -51,8 +54,8 @@ public class ImageProcessing extends PApplet {
         image(t, 800, 300);
         image(s, 1200, 300);
 
-        // ArrayList<PVector> intersections = hough.intersections;
-        // getIntersection(lines);
+        ArrayList<PVector> intersections = hough.intersections;
+        getIntersection(lines);
         // QG.build(lines, width, img.height);
     }
 }

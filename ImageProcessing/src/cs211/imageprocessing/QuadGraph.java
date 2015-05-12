@@ -142,7 +142,7 @@ public class QuadGraph {
                     {
                         int[] p = normalize(path);
                         int[] inv = invert(p);
-                        if (isNew(p) && isNew(inv)) cycles.add(p);
+                        if (isNew(p) && isNew(inv) && path.length == 4) cycles.add(p);
                     }
                 }
     }
