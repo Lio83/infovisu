@@ -54,7 +54,8 @@ public class QuadGraph {
             PVector c34 = intersection(l3, l4);
             PVector c41 = intersection(l4, l1);
 
-            if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41)) {
+            // Filtering quads that are too flat or too small
+            if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41) && validArea(c12, c23, c34, c41, width*height, 0.125f*width*height)) {
                 // Choose a random, semi-transparent colour
                 Random random = new Random();
 
@@ -142,6 +143,7 @@ public class QuadGraph {
                     {
                         int[] p = normalize(path);
                         int[] inv = invert(p);
+                        // Keep only quads (length == 4)
                         if (isNew(p) && isNew(inv) && path.length == 4) cycles.add(p);
                     }
                 }
