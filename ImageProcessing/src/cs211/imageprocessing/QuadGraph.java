@@ -67,7 +67,7 @@ public class QuadGraph {
 
     }
 
-    public PVector intersection(PVector l1, PVector l2) {
+    public static PVector intersection(PVector l1, PVector l2) {
 
         float r1 = l1.x;
         float phi1 = l1.y;

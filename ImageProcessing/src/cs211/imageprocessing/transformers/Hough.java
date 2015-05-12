@@ -15,10 +15,10 @@ public final class Hough implements ImageTransformer {
     private float discretizationStepsPhi = 0.06f;
     private float discretizationStepsR = 2.5f;
     private int rDim = 0;
-    private int nLines = 10;
-    private int minVotes = 200;
-
-    public ArrayList<PVector> intersections = new ArrayList<PVector>();
+    private static int nLines = 10;
+    private static int minVotes = 200;
+    
+    private int[] accumulator, accumulatorNew;
 
     private final int phiDim = (int) (PConstants.PI / discretizationStepsPhi);
     private final float[] tabSin = new float[phiDim];
@@ -40,9 +40,28 @@ public final class Hough implements ImageTransformer {
     @Override
     public PImage apply(PImage src, float... params) {
         if (params != null && params.length == 2) {
-            nLines = (int) params[0];
-            minVotes = (int) params[1];
+            nLines = (int)params[0];
+            minVotes = (int)params[1];
         }
+        
+        accumulator = houghAccumulator(src);
+        
+        PImage houghImg = p.createImage(rDim + 2, phiDim + 2, PConstants.RGB); // TODO : ev. ALPHA
+
+        for (int i = 0; i < accumulator.length; ++i)
+            houghImg.pixels[i] = p.color(PApplet.min(255, accumulator[i]));
+        houghImg.updatePixels();
+
+        //houghImg.resize(width, height);
+        return houghImg;
+    }
+    
+    public ArrayList<PVector> intersections(PImage src, float... params) { // TODO : ajout des paramètres
+        accumulatorNew = vote(nLines);
+        return getIntersections(getLines(src));
+    }
+    
+    private int[] houghAccumulator(PImage src) {
 
         int width = src.width, height = src.height;
         rDim = (int) (((width + height) * 2 + 1) / discretizationStepsR);
@@ -67,20 +86,10 @@ public final class Hough implements ImageTransformer {
                 }
             }
         }
-
-        PImage houghImg = p.createImage(rDim + 2, phiDim + 2, PConstants.ALPHA);
-
-        for (int i = 0; i < accumulator.length; ++i)
-            houghImg.pixels[i] = p.color(PApplet.min(255, accumulator[i]));
-        houghImg.updatePixels();
-
-        getIntersections(getLines(src, vote(accumulator, nLines), minVotes));
-
-        houghImg.resize(width, height);
-        return houghImg;
+        return accumulator;
     }
 
-    private int[] vote(final int[] accumulator, int nLines) {
+    private int[] vote(int nLines) {
         int minVotes = 100;
         int neighbourhood = 10;
 
@@ -133,9 +142,11 @@ public final class Hough implements ImageTransformer {
         return accumulatorNew;
     }
 
-    private ArrayList<PVector> getLines(PImage src, int[] accumulatorNew, int minVotes) {
+    public ArrayList<PVector> getLines(PImage src) {
         ArrayList<PVector> lines = new ArrayList<PVector>();
 
+        if (accumulatorNew == null) accumulatorNew = vote(nLines);
+        
         for (int idx = 0; idx < accumulatorNew.length; ++idx) {
             if (accumulatorNew[idx] > minVotes) {
                 // first, compute back the (r, phi) polar coordinates:
@@ -170,7 +181,9 @@ public final class Hough implements ImageTransformer {
         return lines;
     }
 
-    private void getIntersections(ArrayList<PVector> lines) {
+    private ArrayList<PVector> getIntersections(ArrayList<PVector> lines) {
+        ArrayList<PVector> intersections = new ArrayList<PVector>();
+        
         for (int i = 0; i < lines.size() - 1; ++i) {
             PVector line1 = lines.get(i);
             float r1 = line1.x;
@@ -194,6 +207,7 @@ public final class Hough implements ImageTransformer {
                 p.ellipse(x, y, 10, 10);
             }
         }
+        return intersections;
     }
 
     /**
@@ -202,6 +216,6 @@ public final class Hough implements ImageTransformer {
      */
     @Override
     public PImage apply(PImage src) {
-        return apply(src, nLines, minVotes);
+        return apply(src);
     }
 }
