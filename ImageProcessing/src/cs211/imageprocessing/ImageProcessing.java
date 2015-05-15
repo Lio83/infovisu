@@ -18,7 +18,7 @@ public class ImageProcessing extends PApplet {
 
     @Override
     public void setup() {
-        size(1280, 480);
+        size(1600, 480);
         src = loadImage("board1.jpg");
 
         hsb = new HSBThreshold(this);
@@ -43,18 +43,18 @@ public class ImageProcessing extends PApplet {
         s = sobel.apply(t);
 
         image(src, 0, 0);
-        hough.apply(s, 4, 150);
+        h = hough.apply(s, 4, 150);
         hough.intersections(src);
 
-        h.resize(320, 240);
-        b.resize(320, 240);
-        t.resize(320, 240);
-        s.resize(320, 240);
+        h.resize(320, 480);
+        //b.resize(320, 240);
+        //t.resize(320, 240);
+        //s.resize(320, 240);
 
         image(h, 640, 0);
-        image(b, 960, 0);
-        image(t, 640, 240);
-        image(s, 960, 240);
+        //image(b, 960, 0);
+        //image(t, 640, 240);
+        image(s, 960, 0);
 
     }
 }
