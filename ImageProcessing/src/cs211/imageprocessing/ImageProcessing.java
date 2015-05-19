@@ -19,10 +19,11 @@ public class ImageProcessing extends PApplet {
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
     QuadGraph QG;
+    TwoDThreeD D3D;
 
     @Override
     public void setup() {
-        size(1600, 480);
+        size(640, 480);
         src = loadImage("board1.jpg");
 
         hsb = new HSBThreshold(this);
@@ -32,7 +33,7 @@ public class ImageProcessing extends PApplet {
         hough = new Hough(this);
         
         QG = new QuadGraph(this);
-        
+        D3D = new TwoDThreeD(640, 480);
 
         noLoop(); // no refresh
     }
@@ -51,22 +52,32 @@ public class ImageProcessing extends PApplet {
 
         image(src, 0, 0);
         h = hough.apply(s, 4, 150);
-        hough.intersections(src);
+        
 
-        h.resize(320, 480);
+        //h.resize(320, 480);
         //b.resize(320, 240);
         //t.resize(320, 240);
         //s.resize(320, 240);
 
-        image(h, 640, 0);
+        //image(h, 640, 0);
         //image(b, 960, 0);
         //image(t, 640, 240);
-        image(s, 960, 0);
+        //image(s, 960, 0);
         
       ArrayList<PVector> lines = hough.getLines(src);
-      hough.intersections(src);
+      
+      QG.build(lines, 640, 480);
+      ArrayList<PVector> points = hough.intersections(src);
+      
+      PVector rotates = D3D.get3DRotations(points);
+      
+      System.out.println(rotates);
 
-      QG.build(lines, WIDTH, HEIGHT);
+      
+      
+      if (QG.cycles.size() > 0) {
+          
+      }
 
     }
 }

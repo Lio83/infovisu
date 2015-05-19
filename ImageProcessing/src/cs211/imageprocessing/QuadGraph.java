@@ -30,11 +30,6 @@ public class QuadGraph {
             for (int j = i + 1; j < lines.size(); ++j)
                 if (intersect(lines.get(i), lines.get(j), width, height)) {
 
-                    // TODO
-                    // fill the graph using intersect() to check if two lines
-                    // are
-                    // connected in the graph
-
                     graph[idx][0] = i;
                     graph[idx][1] = j;
 
@@ -144,7 +139,8 @@ public class QuadGraph {
                         int[] p = normalize(path);
                         int[] inv = invert(p);
                      // Keep only quads (length == 4)
-                        if (isNew(p) && isNew(inv) && path.length == 4) cycles.add(p);
+                        if (isNew(p) && isNew(inv) && path.length == 4) 
+                            cycles.add(p);
                     }
                 }
     }
