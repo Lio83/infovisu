@@ -1,7 +1,10 @@
 package cs211.imageprocessing;
 
+import java.util.ArrayList;
+
 import processing.core.PApplet;
 import processing.core.PImage;
+import processing.core.PVector;
 import cs211.imageprocessing.transformers.BinaryThreshold;
 import cs211.imageprocessing.transformers.GaussianBlur;
 import cs211.imageprocessing.transformers.HSBThreshold;
@@ -15,6 +18,7 @@ public class ImageProcessing extends PApplet {
     PImage src;
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
+    QuadGraph QG;
 
     @Override
     public void setup() {
@@ -26,6 +30,9 @@ public class ImageProcessing extends PApplet {
         binary = new BinaryThreshold(this);
         sobel = new Sobel(this);
         hough = new Hough(this);
+        
+        QG = new QuadGraph(this);
+        
 
         noLoop(); // no refresh
     }
@@ -55,6 +62,11 @@ public class ImageProcessing extends PApplet {
         //image(b, 960, 0);
         //image(t, 640, 240);
         image(s, 960, 0);
+        
+      ArrayList<PVector> lines = hough.getLines(src);
+      hough.intersections(src);
+
+      QG.build(lines, WIDTH, HEIGHT);
 
     }
 }
