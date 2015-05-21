@@ -138,9 +138,11 @@ public class QuadGraph {
                     {
                         int[] p = normalize(path);
                         int[] inv = invert(p);
+                        
                      // Keep only quads (length == 4)
                         if (isNew(p) && isNew(inv) && path.length == 4) 
                             cycles.add(p);
+
                     }
                 }
     }

@@ -2,6 +2,7 @@ package cs211.imageprocessing;
 
 import java.util.ArrayList;
 
+
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
@@ -19,7 +20,9 @@ public class ImageProcessing extends PApplet {
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
     QuadGraph QG;
+
     TwoDThreeD D3D;
+
 
     @Override
     public void setup() {
@@ -34,6 +37,8 @@ public class ImageProcessing extends PApplet {
         
         QG = new QuadGraph(this);
         D3D = new TwoDThreeD(640, 480);
+
+        QG = new QuadGraph(this);
 
         noLoop(); // no refresh
     }
@@ -79,5 +84,8 @@ public class ImageProcessing extends PApplet {
           
       }
 
+        ArrayList<PVector> intersections = hough.intersections;
+        getIntersection(lines);
+        // QG.build(lines, width, img.height);
     }
 }
