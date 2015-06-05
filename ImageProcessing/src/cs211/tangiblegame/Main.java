@@ -7,7 +7,6 @@ import java.util.Comparator;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
-import processing.event.MouseEvent;
 import processing.video.Movie;
 import cs211.imageprocessing.QuadGraph;
 import cs211.imageprocessing.TwoDThreeD;
@@ -107,7 +106,6 @@ public final class Main extends PApplet implements GameParameters {
                 src.resize(240, 180);
                 image(src, width / 2 -240, -height / 2);
 
-                System.out.println(quad);
                 if (!quad.isEmpty()) {
                     sortCorners(quad);
                     for (PVector p : quad) {
@@ -118,9 +116,8 @@ public final class Main extends PApplet implements GameParameters {
                     }
                     PVector rots = D3D.get3DRotations(quad);
                     xAngle = rots.x;
-                    zAngle = -rots.y;
+                    zAngle = rots.y;
                     //zAngle = rots.z;
-                    System.out.println("get there!");
                 }
 
                 pushMatrix();
