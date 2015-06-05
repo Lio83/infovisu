@@ -1,7 +1,6 @@
 package cs211.imageprocessing;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 import processing.core.PApplet;
 import processing.core.PVector;
@@ -29,16 +28,12 @@ public class QuadGraph {
         for (int i = 0; i < lines.size(); ++i)
             for (int j = i + 1; j < lines.size(); ++j)
                 if (intersect(lines.get(i), lines.get(j), width, height)) {
-
                     graph[idx][0] = i;
                     graph[idx][1] = j;
-
                     idx++;
                 }
 
-        ArrayList<int[]> quads = findCycles();
-
-        for (int[] quad : quads) {
+        for (int[] quad : findCycles()) {
             PVector l1 = lines.get(quad[0]);
             PVector l2 = lines.get(quad[1]);
             PVector l3 = lines.get(quad[2]);
@@ -54,16 +49,13 @@ public class QuadGraph {
 
             // Filtering quads that are too flat or too small
             if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41)
-                    && validArea(c12, c23, c34, c41, 600000f, 5000f)) {
+                    && validArea(c12, c23, c34, c41, 170000f, 70000f)) {
                 // Choose a random, semi-transparent colour
-                Random random = new Random();
+                // Random random = new Random();
 
-                p.fill(p.color(PApplet.min(255, random.nextInt(300)), PApplet.min(255, random.nextInt(300)),
-                        PApplet.min(255, random.nextInt(300))), 50);
+//                p.fill(p.color(220, 50, 50), 200);
+//                p.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
 
-                p.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
-                
-                
                 points.add(c12);
                 points.add(c23);
                 points.add(c34);
@@ -117,12 +109,12 @@ public class QuadGraph {
         for (int[] element : graph)
             for (int j = 0; j < element.length; j++)
                 findNewCycles(new int[] { element[j] });
-        for (int[] cy : cycles) {
-            String s = "" + cy[0];
-            for (int i = 1; i < cy.length; i++)
-                s += "," + cy[i];
-            System.out.println(s);
-        }
+//        for (int[] cy : cycles) {
+//            String s = "" + cy[0];
+//            for (int i = 1; i < cy.length; i++)
+//                s += "," + cy[i];
+//            System.out.println(s);
+//        }
         return cycles;
     }
 
@@ -256,7 +248,7 @@ public class QuadGraph {
         float i4 = v14.cross(v21).z;
 
         if (i1 > 0 && i2 > 0 && i3 > 0 && i4 > 0 || i1 < 0 && i2 < 0 && i3 < 0 && i4 < 0) return true;
-        else System.out.println("Eliminating non-convex quad");
+        //else System.out.println("Eliminating non-convex quad");
         return false;
 
     }
@@ -278,11 +270,11 @@ public class QuadGraph {
 
         float area = Math.abs(0.5f * (i1 + i2 + i3 + i4));
 
-        //System.out.println(area);
+        // System.out.println(area);
 
         boolean valid = area < max_area && area > min_area;
 
-        if (!valid) System.out.println("Area out of range");
+        //if (!valid) System.out.println("Area out of range");
 
         return valid;
     }
@@ -295,7 +287,7 @@ public class QuadGraph {
     public static boolean nonFlatQuad(PVector c1, PVector c2, PVector c3, PVector c4) {
 
         // cos(70deg) ~= 0.3
-        float min_cos = 0.6f;
+        float min_cos = 0.8f;
 
         PVector v21 = PVector.sub(c1, c2);
         PVector v32 = PVector.sub(c2, c3);
@@ -309,7 +301,7 @@ public class QuadGraph {
 
         if (cos1 < min_cos && cos2 < min_cos && cos3 < min_cos && cos4 < min_cos) return true;
         else {
-            System.out.println("Flat quad");
+            //System.out.println("Flat quad");
             return false;
         }
     }

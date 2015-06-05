@@ -54,10 +54,10 @@ public class ImageProcessing extends PApplet {
 
         image(s, 0, 0);
 
-        hough.apply(s, 6, 180);
+        hough.apply(s, 6, 150);
 
         ArrayList<PVector> lines = hough.getLines(src);
-        hough.getIntersections(lines);
+        //hough.getIntersections(lines);
 
         ArrayList<PVector> quad = sortCorners(QG.build(lines, src.width, src.height));
 
@@ -70,7 +70,6 @@ public class ImageProcessing extends PApplet {
             System.out.println("point: " + p.x + "," + p.y + "," + p.z);
             p.z = 1f;
         }
-
         PVector rots = D3D.get3DRotations(quad);
 
         System.out.println("angles: " + PApplet.degrees(rots.x) + "," + PApplet.degrees(rots.y) + ","

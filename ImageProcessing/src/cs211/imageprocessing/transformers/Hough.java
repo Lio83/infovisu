@@ -156,25 +156,25 @@ public final class Hough implements ImageTransformer {
 
                 lines.add(new PVector(r, phi));
 
-                int x0 = 0;
-                int y0 = (int) (r / PApplet.sin(phi));
-                int x1 = (int) (r / PApplet.cos(phi));
-                int y1 = 0;
-                int x2 = src.width;
-                int y2 = (int) (-PApplet.cos(phi) / PApplet.sin(phi) * x2 + r / PApplet.sin(phi));
-                int y3 = src.width;
-                int x3 = (int) (-(y3 - r / PApplet.sin(phi)) * (PApplet.sin(phi) / PApplet.cos(phi)));
+//                int x0 = 0;
+//                int y0 = (int) (r / PApplet.sin(phi));
+//                int x1 = (int) (r / PApplet.cos(phi));
+//                int y1 = 0;
+//                int x2 = src.width;
+//                int y2 = (int) (-PApplet.cos(phi) / PApplet.sin(phi) * x2 + r / PApplet.sin(phi));
+//                int y3 = src.width;
+//                int x3 = (int) (-(y3 - r / PApplet.sin(phi)) * (PApplet.sin(phi) / PApplet.cos(phi)));
 
                 // Finally, plot the lines
-                p.stroke(204, 102, 0);
-                if (y0 > 0) {
-                    if (x1 > 0) p.line(x0, y0, x1, y1);
-                    else if (y2 > 0) p.line(x0, y0, x2, y2);
-                    else p.line(x0, y0, x3, y3);
-                } else if (x1 > 0) {
-                    if (y2 > 0) p.line(x1, y1, x2, y2);
-                    else p.line(x1, y1, x3, y3);
-                } else p.line(x2, y2, x3, y3);
+//                p.stroke(204, 102, 0);
+//                if (y0 > 0) {
+//                    if (x1 > 0) p.line(x0, y0, x1, y1);
+//                    else if (y2 > 0) p.line(x0, y0, x2, y2);
+//                    else p.line(x0, y0, x3, y3);
+//                } else if (x1 > 0) {
+//                    if (y2 > 0) p.line(x1, y1, x2, y2);
+//                    else p.line(x1, y1, x3, y3);
+//                } else p.line(x2, y2, x3, y3);
             }
         }
         return lines;
@@ -202,8 +202,8 @@ public final class Hough implements ImageTransformer {
                 if (x >= 0 && x <= p.width && y >= 0 && y <= p.height) intersections.add(pv);
 
                 // draw the intersection
-                p.fill(255, 128, 0);
-                p.ellipse(x, y, 10, 10);
+//                p.fill(255, 128, 0);
+//                p.ellipse(x, y, 10, 10);
             }
         }
         return intersections;
