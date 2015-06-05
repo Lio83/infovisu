@@ -46,17 +46,16 @@ public final class Hough implements ImageTransformer {
         
         accumulator = houghAccumulator(src);
         
-        PImage houghImg = p.createImage(rDim + 2, phiDim + 2, PConstants.RGB); // TODO : ev. ALPHA
+        PImage houghImg = p.createImage(rDim + 2, phiDim + 2, PConstants.RGB);
 
         for (int i = 0; i < accumulator.length; ++i)
             houghImg.pixels[i] = p.color(PApplet.min(255, accumulator[i]));
         houghImg.updatePixels();
 
-        //houghImg.resize(width, height);
         return houghImg;
     }
     
-    public ArrayList<PVector> intersections(PImage src, float... params) { // TODO : ajout des paramètres
+    public ArrayList<PVector> intersections(PImage src) {
         accumulatorNew = vote(nLines);
         return getIntersections(getLines(src));
     }
@@ -181,7 +180,7 @@ public final class Hough implements ImageTransformer {
         return lines;
     }
 
-    private ArrayList<PVector> getIntersections(ArrayList<PVector> lines) {
+    public ArrayList<PVector> getIntersections(ArrayList<PVector> lines) {
         ArrayList<PVector> intersections = new ArrayList<PVector>();
         
         for (int i = 0; i < lines.size() - 1; ++i) {

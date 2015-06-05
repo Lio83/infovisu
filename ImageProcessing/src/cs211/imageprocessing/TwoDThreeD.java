@@ -18,7 +18,7 @@ public class TwoDThreeD {
     // static float boardSize = 255.f; // smaller Lego board
 
     // the 3D coordinates of the physical board corners, clockwise
-    static float[][] physicalCorners = { { 128, 128, 0, 1 }, { 128, -128, 0, 1 }, { -128, -128, 0, 1 },
+    static float[][] physicalCorners = { { -128, -128, 0, 1 }, { 128, -128, 0, 1 }, { 128, 128, 0, 1 },
             { -128, 128, 0, 1 }
     // Store here the 3D coordinates of the corners of
     // the real Lego board, in homogenous coordinates

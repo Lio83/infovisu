@@ -17,13 +17,13 @@ public class QuadGraph {
         p = parent;
     }
 
-    public void build(ArrayList<PVector> lines, int width, int height) {
-
+    public ArrayList<PVector> build(ArrayList<PVector> lines, int width, int height) {
+        ArrayList<PVector> points = new ArrayList<PVector>();
         int n = lines.size();
 
         // The maximum possible number of edges is sum(0..n) = n * (n + 1)/2
         graph = new int[n * (n + 1) / 2][2];
-        
+
         int idx = 0;
 
         for (int i = 0; i < lines.size(); ++i)
@@ -35,7 +35,10 @@ public class QuadGraph {
 
                     idx++;
                 }
-        for (int[] quad : findCycles()) {
+
+        ArrayList<int[]> quads = findCycles();
+
+        for (int[] quad : quads) {
             PVector l1 = lines.get(quad[0]);
             PVector l2 = lines.get(quad[1]);
             PVector l3 = lines.get(quad[2]);
@@ -50,7 +53,8 @@ public class QuadGraph {
             PVector c41 = intersection(l4, l1);
 
             // Filtering quads that are too flat or too small
-            if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41) && validArea(c12, c23, c34, c41, width*height, 0.125f*width*height)) {
+            if (isConvex(c12, c23, c34, c41) && nonFlatQuad(c12, c23, c34, c41)
+                    && validArea(c12, c23, c34, c41, 600000f, 5000f)) {
                 // Choose a random, semi-transparent colour
                 Random random = new Random();
 
@@ -58,9 +62,16 @@ public class QuadGraph {
                         PApplet.min(255, random.nextInt(300))), 50);
 
                 p.quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+                
+                
+                points.add(c12);
+                points.add(c23);
+                points.add(c34);
+                points.add(c41);
+                return points;
             }
         }
-
+        return points;
     }
 
     public static PVector intersection(PVector l1, PVector l2) {
@@ -138,10 +149,9 @@ public class QuadGraph {
                     {
                         int[] p = normalize(path);
                         int[] inv = invert(p);
-                        
-                     // Keep only quads (length == 4)
-                        if (isNew(p) && isNew(inv) && path.length == 4) 
-                            cycles.add(p);
+
+                        // Keep only quads (length == 4)
+                        if (isNew(p) && isNew(inv) && path.length == 4) cycles.add(p);
 
                     }
                 }
@@ -268,7 +278,7 @@ public class QuadGraph {
 
         float area = Math.abs(0.5f * (i1 + i2 + i3 + i4));
 
-        // System.out.println(area);
+        //System.out.println(area);
 
         boolean valid = area < max_area && area > min_area;
 
@@ -285,7 +295,7 @@ public class QuadGraph {
     public static boolean nonFlatQuad(PVector c1, PVector c2, PVector c3, PVector c4) {
 
         // cos(70deg) ~= 0.3
-        float min_cos = 0.3f;
+        float min_cos = 0.6f;
 
         PVector v21 = PVector.sub(c1, c2);
         PVector v32 = PVector.sub(c2, c3);

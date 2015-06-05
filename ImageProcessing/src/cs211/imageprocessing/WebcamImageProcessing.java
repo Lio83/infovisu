@@ -1,18 +1,19 @@
 package cs211.imageprocessing;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-import cs211.imageprocessing.transformers.*;
 import processing.core.PApplet;
 import processing.core.PImage;
-import processing.core.PVector;
-import processing.video.*;
+import processing.video.Capture;
+import cs211.imageprocessing.transformers.BinaryThreshold;
+import cs211.imageprocessing.transformers.GaussianBlur;
+import cs211.imageprocessing.transformers.HSBThreshold;
+import cs211.imageprocessing.transformers.Hough;
+import cs211.imageprocessing.transformers.ImageTransformer;
+import cs211.imageprocessing.transformers.Sobel;
 
 @SuppressWarnings("serial")
 public class WebcamImageProcessing extends PApplet {
 
-	Capture cam;
+    Capture cam;
     PImage src;
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
@@ -21,7 +22,7 @@ public class WebcamImageProcessing extends PApplet {
     @Override
     public void setup() {
         size(1280, 480);
-        
+
         String[] cameras = Capture.list();
         if (cameras.length == 0) {
             println("There are no cameras available for capture.");
@@ -34,7 +35,7 @@ public class WebcamImageProcessing extends PApplet {
             cam = new Capture(this, cameras[0]);
             cam.start();
         }
-        
+
         hsb = new HSBThreshold(this);
         blur = new GaussianBlur(this);
         binary = new BinaryThreshold(this);
@@ -50,56 +51,57 @@ public class WebcamImageProcessing extends PApplet {
         background(color(0, 0, 0));
         if (cam.available() == true) {
             cam.read();
-        
-        src = cam.get();
-        
-        PImage h, b, t, s;
 
-        h = hsb.apply(src, 80, 140, 80, 255, 80, 255);
-        b = blur.apply(h, 40);
-        t = binary.apply(b);
-        s = sobel.apply(t, .2f);
+            src = cam.get();
 
-        image(src, 0, 0);
-        hough.apply(s, 6, 150);
-        hough.intersections(src, null);
+            PImage h, b, t, s;
 
-        h.resize(320, 240);
-        b.resize(320, 240);
-        t.resize(320, 240);
-        s.resize(320, 240);
+            h = hsb.apply(src, 80, 140, 80, 255, 80, 255);
+            b = blur.apply(h, 40);
+            t = binary.apply(b);
+            s = sobel.apply(t, .2f);
 
-        image(h, 640, 0);
-        image(b, 960, 0);
-        image(t, 640, 240);
-        image(s, 960, 240);
-        
-//        ArrayList<PVector> lines = hough.getLines(src);
-//        hough.intersections(src, null);
-//        if (false && lines.size() >= 4) {
-//            
-//            
-//            QG.build(lines, src.width, src.height);
-//
-//            for (int[] quad : QG.cycles) {
-//                PVector l1 = lines.get(quad[0]);
-//                PVector l2 = lines.get(quad[1]);
-//                PVector l3 = lines.get(quad[2]);
-//                PVector l4 = lines.get(quad[3]);
-//                // (intersection() is a simplified version of the
-//                // intersections() method you wrote last week, that simply
-//                // return the coordinates of the intersection between 2 lines)
-//                PVector c12 = QuadGraph.intersection(l1, l2);
-//                PVector c23 = QuadGraph.intersection(l2, l3);
-//                PVector c34 = QuadGraph.intersection(l3, l4);
-//                PVector c41 = QuadGraph.intersection(l4, l1);
-//                // Choose a random, semi-transparent colour
-//                Random random = new Random();
-//                fill(color(min(255, random.nextInt(300)), min(255, random.nextInt(300)), min(255, random.nextInt(300)),
-//                        50));
-//                quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
-//            }
-//        }
+            image(src, 0, 0);
+            hough.apply(s, 6, 150);
+            hough.intersections(s);
+
+            h.resize(320, 240);
+            b.resize(320, 240);
+            t.resize(320, 240);
+            s.resize(320, 240);
+
+            image(h, 640, 0);
+            image(b, 960, 0);
+            image(t, 640, 240);
+            image(s, 960, 240);
+
+            // ArrayList<PVector> lines = hough.getLines(src);
+            // hough.intersections(src, null);
+            // if (false && lines.size() >= 4) {
+            //
+            //
+            // QG.build(lines, src.width, src.height);
+            //
+            // for (int[] quad : QG.cycles) {
+            // PVector l1 = lines.get(quad[0]);
+            // PVector l2 = lines.get(quad[1]);
+            // PVector l3 = lines.get(quad[2]);
+            // PVector l4 = lines.get(quad[3]);
+            // // (intersection() is a simplified version of the
+            // // intersections() method you wrote last week, that simply
+            // // return the coordinates of the intersection between 2 lines)
+            // PVector c12 = QuadGraph.intersection(l1, l2);
+            // PVector c23 = QuadGraph.intersection(l2, l3);
+            // PVector c34 = QuadGraph.intersection(l3, l4);
+            // PVector c41 = QuadGraph.intersection(l4, l1);
+            // // Choose a random, semi-transparent colour
+            // Random random = new Random();
+            // fill(color(min(255, random.nextInt(300)), min(255,
+            // random.nextInt(300)), min(255, random.nextInt(300)),
+            // 50));
+            // quad(c12.x, c12.y, c23.x, c23.y, c34.x, c34.y, c41.x, c41.y);
+            // }
+            // }
         }
     }
 }

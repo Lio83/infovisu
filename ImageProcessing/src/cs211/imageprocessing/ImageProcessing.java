@@ -1,7 +1,8 @@
 package cs211.imageprocessing;
 
 import java.util.ArrayList;
-
+import java.util.Collections;
+import java.util.Comparator;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -20,25 +21,22 @@ public class ImageProcessing extends PApplet {
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
     QuadGraph QG;
-
     TwoDThreeD D3D;
-
 
     @Override
     public void setup() {
-        size(640, 480);
-        src = loadImage("board1.jpg");
+        size(800, 600);
+        src = loadImage("board4.jpg");
+        // src.resize(640, 480);
 
         hsb = new HSBThreshold(this);
         blur = new GaussianBlur(this);
         binary = new BinaryThreshold(this);
         sobel = new Sobel(this);
         hough = new Hough(this);
-        
-        QG = new QuadGraph(this);
-        D3D = new TwoDThreeD(640, 480);
 
         QG = new QuadGraph(this);
+        D3D = new TwoDThreeD(src.width, src.height);
 
         noLoop(); // no refresh
     }
@@ -47,45 +45,80 @@ public class ImageProcessing extends PApplet {
     public void draw() {
         background(color(0, 0, 0));
 
-        PImage h, b, t, s;
-        src.resize(640, 480);
+        PImage s;
 
-        h = hsb.apply(src);
-        b = blur.apply(h, 10);
-        t = binary.apply(b);
-        s = sobel.apply(t);
+        s = hsb.apply(src);
+        s = blur.apply(s, 10);
+        s = binary.apply(s);
+        s = sobel.apply(s);
 
-        image(src, 0, 0);
-        h = hough.apply(s, 4, 150);
-        
+        image(s, 0, 0);
 
-        //h.resize(320, 480);
-        //b.resize(320, 240);
-        //t.resize(320, 240);
-        //s.resize(320, 240);
+        hough.apply(s, 6, 180);
 
-        //image(h, 640, 0);
-        //image(b, 960, 0);
-        //image(t, 640, 240);
-        //image(s, 960, 0);
-        
-      ArrayList<PVector> lines = hough.getLines(src);
-      
-      QG.build(lines, 640, 480);
-      ArrayList<PVector> points = hough.intersections(src);
-      
-      PVector rotates = D3D.get3DRotations(points);
-      
-      System.out.println(rotates);
+        ArrayList<PVector> lines = hough.getLines(src);
+        hough.getIntersections(lines);
 
-      
-      
-      if (QG.cycles.size() > 0) {
-          
-      }
+        ArrayList<PVector> quad = sortCorners(QG.build(lines, src.width, src.height));
 
-        ArrayList<PVector> intersections = hough.intersections;
-        getIntersection(lines);
-        // QG.build(lines, width, img.height);
+        if (quad.size() != 4) {
+            System.out.println("Pas de points!");
+            return;
+        }
+
+        for (PVector p : quad) {
+            System.out.println("point: " + p.x + "," + p.y + "," + p.z);
+            p.z = 1f;
+        }
+
+        PVector rots = D3D.get3DRotations(quad);
+
+        System.out.println("angles: " + PApplet.degrees(rots.x) + "," + PApplet.degrees(rots.y) + ","
+                + PApplet.degrees(rots.z));
+
+        // h.resize(320, 480);
+        // b.resize(320, 240);
+        // t.resize(320, 240);
+        // s.resize(320, 240);
+
+        // image(h, 640, 0);
+        // image(b, 960, 0);
+        // image(t, 640, 240);
+        // image(s, 960, 0);
+
+    }
+
+    static class CWComparator implements Comparator<PVector> {
+        PVector center;
+
+        public CWComparator(PVector center) {
+            this.center = center;
+        }
+
+        @Override
+        public int compare(PVector b, PVector d) {
+            if (Math.atan2(b.y - center.y, b.x - center.x) < Math.atan2(d.y - center.y, d.x - center.x)) return -1;
+            else return 1;
+        }
+    }
+
+    public static ArrayList<PVector> sortCorners(ArrayList<PVector> quad) {
+        // Sort corners so that they are ordered clockwise
+        PVector a = quad.get(0);
+        PVector b = quad.get(2);
+        PVector center = new PVector((a.x + b.x) / 2, (a.y + b.y) / 2);
+        Collections.sort(quad, new CWComparator(center));
+        int min = 0;
+        float dist = 10e6f;
+        for (int i = 0; i < quad.size(); ++i) {
+            float d = quad.get(i).magSq();
+            if (d < dist) {
+                dist = d;
+                min = i;
+            }
+        }
+        System.out.println(min);
+        Collections.rotate(quad, -min);
+        return quad;
     }
 }
