@@ -28,11 +28,12 @@ public final class HSBThreshold implements ImageTransformer {
             briMin = params[4];
             briMax = params[5];
         }
+        int width = src.width, height = src.height;
 
-        PImage result = p.createImage(src.width, src.height, PConstants.RGB);
+        PImage result = p.createImage(width, height, PConstants.RGB);
 
-        for (int y = 0; y < src.height; ++y) {
-            for (int x = 0; x < src.width; ++x) {
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
                 int pix = src.get(x, y);
                 float hue = p.hue(pix);
                 float bri = p.brightness(pix);
