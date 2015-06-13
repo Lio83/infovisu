@@ -3,8 +3,11 @@ package cs211.tangiblegame;
 import processing.core.PConstants;
 
 abstract interface GameParameters {
+	final static boolean WEBCAM = false;
     final static int WINDOW_WIDTH = 800;
     final static int WINDOW_HEIGHT = 600;
+    final static int WINDOW_SETTINGS_WIDTH = 1280;
+    final static int WINDOW_SETTINGS_HEIGHT = 680;
 
     final static int PLATE_X = 300;
     final static int PLATE_Y = 20;
