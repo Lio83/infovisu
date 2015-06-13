@@ -52,28 +52,28 @@ public class ImageProcessing extends PApplet {
         s = binary.apply(s);
         s = sobel.apply(s);
 
-        image(s, 0, 0);
+        image(src, 0, 0);
 
         hough.apply(s, 6, 150);
 
+        hough.intersections(s);
         ArrayList<PVector> lines = hough.getLines(src);
-        //hough.getIntersections(lines);
+        ArrayList<PVector> quad = QG.build(lines, src.width, src.height);
+        
+        if (!quad.isEmpty()) {
+            sortCorners(quad);
+            for (PVector p : quad) {
+                //Afiche les points.
+                //System.out.println("point: " + p.x + "," + p.y + "," + p.z);
+                p.z = 1f;
+            }
+            PVector rots = D3D.get3DRotations(quad);
 
-        ArrayList<PVector> quad = sortCorners(QG.build(lines, src.width, src.height));
-
-        if (quad.size() != 4) {
-            System.out.println("Pas de points!");
-            return;
+            // Affiche les angles.
+            System.out.println("angles: " + PApplet.degrees(rots.x) + "," + PApplet.degrees(rots.y) + ","
+                    + PApplet.degrees(rots.z));
         }
-
-        for (PVector p : quad) {
-            System.out.println("point: " + p.x + "," + p.y + "," + p.z);
-            p.z = 1f;
-        }
-        PVector rots = D3D.get3DRotations(quad);
-
-        System.out.println("angles: " + PApplet.degrees(rots.x) + "," + PApplet.degrees(rots.y) + ","
-                + PApplet.degrees(rots.z));
+        
 
         // h.resize(320, 480);
         // b.resize(320, 240);

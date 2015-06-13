@@ -46,33 +46,33 @@ public final class TangibleGame extends PApplet implements GameParameters {
     // Movie renderer.
     Movie movie;
     Capture cam;
-    
+
     // Image transformers.
     PImage src;
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
     QuadGraph QG;
     TwoDThreeD D3D;
-    
+
     boolean init = true;
-    
+
     // Parameters of the transformers
-    float[] hsbParameters = {100, 140, 130, 255, 70, 220};
+    float[] hsbParameters = { 100, 140, 130, 255, 70, 220 };
     float blurParameters = 10;
-    float[] houghParameters = {6, 160};
+    float[] houghParameters = { 6, 160 };
 
     public TangibleGame(float[] hsbParameters, float blurParameters, float[] houghParameters) {
-    	this();
-    	this.hsbParameters = hsbParameters;
-    	this.blurParameters = blurParameters;
-    	this.houghParameters = houghParameters;
-    	webcam = true;
+        this();
+        this.hsbParameters = hsbParameters;
+        this.blurParameters = blurParameters;
+        this.houghParameters = houghParameters;
+        webcam = true;
     }
-    
+
     public TangibleGame() {
-    	super();
+        super();
     }
-    
+
     @Override
     public void setup() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
@@ -81,12 +81,12 @@ public final class TangibleGame extends PApplet implements GameParameters {
         score = new Score(this);
         scrollbar = new HScrollbar(this, 225, WINDOW_HEIGHT - 25, Score.CHART_WIDTH, 15);
         if (webcam) {
-        	String[] cameras = Capture.list();
-        	cam = new Capture(this, cameras[0]);
-        	cam.start();
+            String[] cameras = Capture.list();
+            cam = new Capture(this, cameras[0]);
+            cam.start();
         } else {
-        	movie = new Movie(this, "testvideo.mp4");
-        	movie.loop();
+            movie = new Movie(this, "testvideo.mp4");
+            movie.loop();
         }
         hsb = new HSBThreshold(this);
         blur = new GaussianBlur(this);
@@ -120,46 +120,42 @@ public final class TangibleGame extends PApplet implements GameParameters {
         if (gameMode) {
             if ((!webcam && movie.available()) || (webcam && cam.available() == true)) {
                 if (webcam) {
-                	cam.read();
-                	src = cam.get();
+                    cam.read();
+                    src = cam.get();
                 } else {
-                	movie.read();
-                	src = movie.get();
+                    movie.read();
+                    src = movie.get();
                 }
-                PImage r;
-                r = hsb.apply(src, hsbParameters);
-                r = blur.apply(r, blurParameters);
-                r = binary.apply(r);
-                r = sobel.apply(r);
-                hough.apply(r, houghParameters);
-                hough.intersections(r);
+
+                PImage i1, i2;
+                i1 = hsb.apply(src, hsbParameters);
+                i2 = blur.apply(i1, blurParameters);
+                i1 = binary.apply(i2);
+                i2 = sobel.apply(i1);
+                hough.apply(i2, houghParameters);
+                hough.intersections(i2);
                 ArrayList<PVector> lines = hough.getLines(src);
                 ArrayList<PVector> quad = QG.build(lines, src.width, src.height);
-                
-                src.resize(240, 180);
-                image(src, width / 2 -240, -height / 2);
+
+                src.resize(240, 180); // Smaller movie
+                image(src, width / 2 - 240, -height / 2); // Upper right corner
 
                 if (!quad.isEmpty()) {
-                    sortCorners(quad);
-                    for (PVector p : quad) {
-                        // Affiche les points.
-                        // System.out.println("point: " + p.x + "," + p.y + ","
-                        // + p.z);
-                        p.z = 1f;
-                    }
-                    PVector rots = D3D.get3DRotations(quad);
-//                    println("x : "+abs(xAngle-rots.x)+" y : "+abs(zAngle-rots.y));
                     
-                    if (abs(xAngle-rots.x) < 0.8 || init) {
-                    	xAngle = constrain(rots.x, MIN_ANGLE, MAX_ANGLE);
+                    sortCorners(quad);
+   
+                    for (PVector p : quad)
+                        p.z = 1f;
+                    
+                    PVector rots = D3D.get3DRotations(quad);
+                    rots.y *= -1; // For symetry
+                    
+                    // Evicts huge angle diff.
+                    if (abs(zAngle - rots.y) < 0.7 && abs(xAngle - rots.x) < 0.7 || init) {
+                        xAngle = constrain(rots.x, MIN_ANGLE, MAX_ANGLE);
+                        zAngle = constrain(rots.y, MIN_ANGLE, MAX_ANGLE);
                     }
-                    if (abs(zAngle-rots.y) < 0.8 || init) {
-                    	zAngle = constrain(rots.y, MIN_ANGLE, MAX_ANGLE);
-                    }
-                    if (init) {
-                    	init = false;
-                    }
-                    //zAngle = rots.z;
+                    if (init) init = false;
                 }
 
                 pushMatrix();
@@ -197,35 +193,38 @@ public final class TangibleGame extends PApplet implements GameParameters {
         popMatrix();
     }
 
-//    @Override
-//    public void mouseDragged() {
-//        if (gameMode && !scrollbar.locked) {
-//            zAngle += 0.01f * sensitivity * (mouseX - pmouseX);
-//            xAngle += 0.01f * sensitivity * (pmouseY - mouseY);
-//            zAngle = constrain(zAngle, MIN_ANGLE, MAX_ANGLE);
-//            xAngle = constrain(xAngle, MIN_ANGLE, MAX_ANGLE);
-//        }
-//    }
-//
-//    @Override
-//    public void mouseWheel(MouseEvent event) {
-//        sensitivity += 0.1f * event.getCount();
-//        sensitivity = constrain(sensitivity, MIN_SENSI, MAX_SENSI);
-//    }
+    // @Override
+    // public void mouseDragged() {
+    // if (gameMode && !scrollbar.locked) {
+    // zAngle += 0.01f * sensitivity * (mouseX - pmouseX);
+    // xAngle += 0.01f * sensitivity * (pmouseY - mouseY);
+    // zAngle = constrain(zAngle, MIN_ANGLE, MAX_ANGLE);
+    // xAngle = constrain(xAngle, MIN_ANGLE, MAX_ANGLE);
+    // }
+    // }
+    //
+    // @Override
+    // public void mouseWheel(MouseEvent event) {
+    // sensitivity += 0.1f * event.getCount();
+    // sensitivity = constrain(sensitivity, MIN_SENSI, MAX_SENSI);
+    // }
 
     @Override
     public void mouseClicked() {
-        if (!gameMode) cylinders.add(new Cylinder(this, getPosition()));
+        if (!gameMode)
+            cylinders.add(new Cylinder(this, getPosition()));
     }
 
     @Override
     public void keyReleased() {
-        if (key == CODED && keyCode == SHIFT) gameMode = true;
+        if (key == CODED && keyCode == SHIFT)
+            gameMode = true;
     }
 
     @Override
     public void keyPressed() {
-        if (key == CODED && keyCode == SHIFT) gameMode = false;
+        if (key == CODED && keyCode == SHIFT)
+            gameMode = false;
     }
 
     private PVector getPosition() {
@@ -243,8 +242,10 @@ public final class TangibleGame extends PApplet implements GameParameters {
 
         @Override
         public int compare(PVector b, PVector d) {
-            if (Math.atan2(b.y - center.y, b.x - center.x) < Math.atan2(d.y - center.y, d.x - center.x)) return -1;
-            else return 1;
+            if (Math.atan2(b.y - center.y, b.x - center.x) < Math.atan2(d.y - center.y, d.x - center.x))
+                return -1;
+            else
+                return 1;
         }
     }
 

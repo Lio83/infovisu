@@ -50,7 +50,7 @@ public class MovieImageProcessing extends PApplet {
             cam.read();
 
             src = cam.get();
-
+            image(src, 0, 0);
             PImage h, b, t, s;
 
             h = hsb.apply(src, 100, 140, 130, 255, 70, 220);
@@ -58,10 +58,11 @@ public class MovieImageProcessing extends PApplet {
             t = binary.apply(b);
             s = sobel.apply(t);
             hough.apply(s, 6, 160);
-            image(src, 0, 0);
+            
 
             hough.intersections(s);
             ArrayList<PVector> lines = hough.getLines(src);
+            hough.getIntersections(lines);
             
             //hough.getIntersections(lines);
             ArrayList<PVector> quad = QG.build(lines, src.width, src.height);
@@ -79,8 +80,6 @@ public class MovieImageProcessing extends PApplet {
                 System.out.println("angles: " + PApplet.degrees(rots.x) + "," + PApplet.degrees(rots.y) + ","
                         + PApplet.degrees(rots.z));
             }
-
-            
              
             //
             // System.out.println("angles: " + PApplet.degrees(rots.x) + "," +

@@ -164,8 +164,8 @@ public final class Hough implements ImageTransformer {
 //                int y2 = (int) (-PApplet.cos(phi) / PApplet.sin(phi) * x2 + r / PApplet.sin(phi));
 //                int y3 = src.width;
 //                int x3 = (int) (-(y3 - r / PApplet.sin(phi)) * (PApplet.sin(phi) / PApplet.cos(phi)));
-
-                // Finally, plot the lines
+//
+//                // Finally, plot the lines
 //                p.stroke(204, 102, 0);
 //                if (y0 > 0) {
 //                    if (x1 > 0) p.line(x0, y0, x1, y1);
