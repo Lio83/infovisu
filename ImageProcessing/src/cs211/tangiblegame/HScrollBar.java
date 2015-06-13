@@ -41,6 +41,14 @@ class HScrollbar {
         sliderPositionMin = xPosition;
         sliderPositionMax = xPosition + barWidth - barHeight;
     }
+    
+    // Constructor with initial position
+    HScrollbar(PApplet parent, float x, float y, float w, float h, float initPos) {
+    	this(parent, x, y, w, h);
+    	sliderPosition = xPosition + initPos * barWidth - barHeight * initPos;
+    	newSliderPosition = sliderPosition;
+    	
+    }
 
     /**
      * @brief Updates the state of the scrollbar according to the mouse movement

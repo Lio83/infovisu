@@ -7,6 +7,7 @@ import java.util.Comparator;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PVector;
+import processing.video.Capture;
 import processing.video.Movie;
 import cs211.imageprocessing.QuadGraph;
 import cs211.imageprocessing.TwoDThreeD;
@@ -24,7 +25,7 @@ import cs211.imageprocessing.transformers.Sobel;
  * 
  */
 @SuppressWarnings("serial")
-public final class Main extends PApplet implements GameParameters {
+public final class TangibleGame extends PApplet implements GameParameters {
 
     private Mover mover;
     private Score score;
@@ -40,17 +41,38 @@ public final class Main extends PApplet implements GameParameters {
     private float sensitivity = 0.5f;
 
     private boolean gameMode = true;
+    private boolean webcam = false;
 
     // Movie renderer.
-    Movie cam;
-
+    Movie movie;
+    Capture cam;
+    
     // Image transformers.
     PImage src;
     ImageTransformer hsb, blur, binary, sobel;
     Hough hough;
     QuadGraph QG;
     TwoDThreeD D3D;
+    
+    boolean init = true;
+    
+    // Parameters of the transformers
+    float[] hsbParameters = {100, 140, 130, 255, 70, 220};
+    float blurParameters = 10;
+    float[] houghParameters = {6, 160};
 
+    public TangibleGame(float[] hsbParameters, float blurParameters, float[] houghParameters) {
+    	this();
+    	this.hsbParameters = hsbParameters;
+    	this.blurParameters = blurParameters;
+    	this.houghParameters = houghParameters;
+    	webcam = true;
+    }
+    
+    public TangibleGame() {
+    	super();
+    }
+    
     @Override
     public void setup() {
         size(WINDOW_WIDTH, WINDOW_HEIGHT, P3D);
@@ -58,8 +80,14 @@ public final class Main extends PApplet implements GameParameters {
         cylinders = new ArrayList<>();
         score = new Score(this);
         scrollbar = new HScrollbar(this, 225, WINDOW_HEIGHT - 25, Score.CHART_WIDTH, 15);
-        cam = new Movie(this, "testvideo.mp4");
-        cam.loop();
+        if (webcam) {
+        	String[] cameras = Capture.list();
+        	cam = new Capture(this, cameras[0]);
+        	cam.start();
+        } else {
+        	movie = new Movie(this, "testvideo.mp4");
+        	movie.loop();
+        }
         hsb = new HSBThreshold(this);
         blur = new GaussianBlur(this);
         binary = new BinaryThreshold(this);
@@ -90,15 +118,20 @@ public final class Main extends PApplet implements GameParameters {
 
         // ======================================= GAME MODE
         if (gameMode) {
-            if (cam.available()) {
-                cam.read();
-                src = cam.get();
+            if ((!webcam && movie.available()) || (webcam && cam.available() == true)) {
+                if (webcam) {
+                	cam.read();
+                	src = cam.get();
+                } else {
+                	movie.read();
+                	src = movie.get();
+                }
                 PImage r;
-                r = hsb.apply(src, 100, 140, 130, 255, 70, 220);
-                r = blur.apply(r, 10);
+                r = hsb.apply(src, hsbParameters);
+                r = blur.apply(r, blurParameters);
                 r = binary.apply(r);
                 r = sobel.apply(r);
-                hough.apply(r, 6, 160);
+                hough.apply(r, houghParameters);
                 hough.intersections(r);
                 ArrayList<PVector> lines = hough.getLines(src);
                 ArrayList<PVector> quad = QG.build(lines, src.width, src.height);
@@ -109,14 +142,23 @@ public final class Main extends PApplet implements GameParameters {
                 if (!quad.isEmpty()) {
                     sortCorners(quad);
                     for (PVector p : quad) {
-                        // Afiche les points.
+                        // Affiche les points.
                         // System.out.println("point: " + p.x + "," + p.y + ","
                         // + p.z);
                         p.z = 1f;
                     }
                     PVector rots = D3D.get3DRotations(quad);
-                    xAngle = rots.x;
-                    zAngle = rots.y;
+//                    println("x : "+abs(xAngle-rots.x)+" y : "+abs(zAngle-rots.y));
+                    
+                    if (abs(xAngle-rots.x) < 0.8 || init) {
+                    	xAngle = constrain(rots.x, MIN_ANGLE, MAX_ANGLE);
+                    }
+                    if (abs(zAngle-rots.y) < 0.8 || init) {
+                    	zAngle = constrain(rots.y, MIN_ANGLE, MAX_ANGLE);
+                    }
+                    if (init) {
+                    	init = false;
+                    }
                     //zAngle = rots.z;
                 }
 
@@ -224,5 +266,4 @@ public final class Main extends PApplet implements GameParameters {
         Collections.rotate(quad, -min);
         // return quad;
     }
-
 }
